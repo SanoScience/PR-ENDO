@@ -6,7 +6,7 @@ Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dim
 ![PR-ENDO Teaser](teaser.png)
 
 ## Citation
-If you use this work, please cite:
+If you find this work useful, please cite:
 
 ```bibtex
 @misc{kaleta2024prendo,
