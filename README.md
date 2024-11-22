@@ -5,3 +5,14 @@ Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dim
 
 ![PR-ENDO Teaser](teaser.png)
 
+If you find this work useful please cite:
+
+@misc{kaleta2024prendophysicallybasedrelightable,
+      title={PR-ENDO: Physically Based Relightable Gaussian Splatting for Endoscopy}, 
+      author={Joanna Kaleta and Weronika Smolak-Dyżewska and Dawid Malarz and Diego Dall'Alba and Przemysław Korzeniowski and Przemysław Spurek},
+      year={2024},
+      eprint={2411.12510},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2411.12510}, 
+}
