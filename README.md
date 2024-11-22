@@ -27,6 +27,8 @@ We simulate body movements using GaMeS reparameterization.
   <img src="gifs/camera3_sigmt1.gif" alt="Camera Movement 3" width="30%">
 </p>
 
+## Code
+Coming soon!
 
 ## Citation
 If you find this work useful, please cite:
