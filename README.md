@@ -5,7 +5,7 @@ Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dim
 
 ![PR-ENDO Teaser](teaser.png)
 
----
+
 
 ## Separate Light from Camera
 We separate light from the camera, adjust light direction, and spotlight angle for realistic relightning effects.
@@ -17,7 +17,6 @@ We separate light from the camera, adjust light direction, and spotlight angle f
   <img src="gifs/rotatelight_mediumspotlight479.gif" alt="Rotating Light 3" width="30%">
 </p>
 
----
 
 ## Simulate Body Movements
 We simulate body movements using GaMeS reparameterization.
@@ -28,7 +27,6 @@ We simulate body movements using GaMeS reparameterization.
   <img src="gifs/camera3_sigmt1.gif" alt="Camera Movement 3" width="30%">
 </p>
 
----
 
 ## Citation
 If you find this work useful, please cite:
