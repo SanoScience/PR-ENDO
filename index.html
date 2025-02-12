@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="PR-ENDO: Physically Based Relightable Gaussian Splatting for Endoscopy">
+  <meta name="keywords" content="Gaussian Splatting, Colonoscopy, Reconstruction, Relighting">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PR-ENDO: Physically Based Relightable Gaussian Splatting for Endoscopy</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+<!--   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+
+  </script> -->
+  <style>
+  .hr {width: 100%; height: 1px; margin: 48px 0; background-color: #d6dbdf;}
+  </style>
+
+  <link rel="stylesheet" href="./assets/css/bulma.min.css">
+  <link rel="stylesheet" href="./assets/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./assets/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./assets/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="./assets/css/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
+
+  <!-- custom css file  -->
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/twentytwenty.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop head">
+      <div class="columns is-centered">
+        <div class="column has-text-centered head">
+          <div class="logo">
+          <a href="index.html">
+          </a>
+          </div>
+          <br>
+
+          <h1 class="title is-3 publication-title"> 
+            <font color="#EA6B66"><b>PR-ENDO</b></font>: Physically Based Relightable Gaussian Splatting for Endoscopy
+          </h1>
+            
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=dN6uh28AAAAJ&hl=en">Joanna Kaleta</a><sup>1,2,*</sup>,&nbsp;&nbsp;</span> 
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=3glCXHwAAAAJ&hl=en">Weronika Smolak-Dyżewska</a><sup>3,*</sup>,&nbsp;&nbsp;</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=p9hxe6wAAAAJ">Dawid Malarz</a><sup>3</sup>,&nbsp;&nbsp;</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=8jxdg6MAAAAJ&hl=en">Diego Dall'Alba</a><sup>4</sup>,&nbsp;&nbsp;</span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?hl=en&user=lNOtdSwAAAAJ">Przemysław Korzeniowski</a><sup>2</sup>,&nbsp;&nbsp;</span> 
+            <span class="author-block">
+              <span class="author-block">
+                <a href="https://scholar.google.com/citations?hl=en&user=0kp0MbgAAAAJ">Przemysław Spurek</a><sup>3</sup></span>
+              <span class="author-block">
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Warsaw University of Technology, </span>
+            <span class="author-block"><sup>2</sup>Sano Centre for Computational Medicine, </span>
+            <span class="author-block"><sup>3</sup>Jagiellonian University,</span>
+            <span class="author-block"><sup>4</sup>University of Verona</span>
+          </div>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">*equal contribution</span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <!-- <span class="link-block">
+                <a href="./xx.pdf" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span> -->
+              <!-- arXiv Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2411.12510" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+
+              <!-- Code Link. -->
+              <span class="link-block"> 
+                <a href="https://github.com/SanoScience/PR-ENDO" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- first row -->
+<section class="hero is-small">
+    <div class="container">
+      <img src="assets/images/teaser.png" alt="PR-ENDO">
+      </div>
+</section>
+
+
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+      <!-- <div class="column"> -->
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dimensional reconstruction of the environment for real-time novel-view synthesis can significantly enhance diagnosis.
+             We present <b>PR-ENDO</b>, a framework that leverages 3D Gaussian Splatting within a physically based, relightable model tailored for the complex acquisition conditions in endoscopy, such as restricted camera rotations and strong view-dependent illumination. 
+             By exploiting the connection between the camera and light source, our approach introduces a relighting model to capture the intricate interactions between light and tissue using physically based rendering and MLP. 
+             Existing methods often produce artifacts and inconsistencies under these conditions, which <b>PR-ENDO</b> overcomes by incorporating a specialized diffuse MLP that utilizes light angles and normal vectors, achieving stable reconstructions even with limited training camera rotations. 
+             We benchmarked our framework using a publicly available dataset and a newly introduced dataset with wider camera rotations. 
+            Our methods demonstrated superior image quality compared to baseline approaches.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  
+</section>
+
+
+<section class="section">
+  <div class="container is-fullhd has-text-centered">
+
+    <div class="container">
+      <h2 class="title is-3">Animate</h2>
+      <div class="video-box">
+        <video id="sim1" src="assets/videos/video.mp4" autoplay loop muted></video>
+        <video id="sim2" src="assets/videos/camera0_transt1.mp4" autoplay loop muted></video>
+      </div>
+    </div>
+    </div>
+  </section>
+    
+  <section class="section">
+    <div class="container has-text-centered">
+        <h2 class="title is-3">Change colon attributes</h2>
+        <div class="col-xs-12">
+          <div class="switch">
+            <input id="switch-y" name="tripple" type="radio" value="Y" class="switch-input"  data-stage="1" />
+            <label for="switch-y" class="switch-label switch-label-y">Less rough</label>
+            <input id="switch-i" name="tripple" type="radio" value="I" class="switch-input" checked  data-stage="2" />
+            <label for="switch-i" class="switch-label switch-label-i">Normal</label>
+            <input id="switch-n" name="tripple" type="radio" value="N" class="switch-input"  data-stage="3" />
+            <label for="switch-n" class="switch-label switch-label-n">More rough</label>
+            <span class="switch-selector"></span>
+          </div>
+        </div>
+        <div class="video-container">
+          <video id="video1" src="assets/videos/rotatelight_lessroughness247.mp4" autoplay loop muted></video>
+          <video id="video2" src="assets/videos/normalroughness_247.mp4" autoplay loop class="active" muted></video>
+          <video id="video3" src="assets/videos/moreroughness_247.mp4" autoplay loop muted></video>
+        </div>
+    </div>
+  </section>
+    
+    
+    <div class="content has-text-justified">
+      <p></p>
+    </div>
+    </div>
+  </div>  
+</section>
+
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">BibTeX</h2>
+    <pre><code>@misc{kaleta2024prendo,
+      title={PR-ENDO: Physically Based Relightable Gaussian Splatting for Endoscopy}, 
+      author={Joanna Kaleta and Weronika Smolak-Dyżewska and Dawid Malarz and Diego Dall'Alba and Przemysław Korzeniowski and Przemysław Spurek},
+      year={2024},
+      eprint={2411.12510},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2411.12510}
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link" href="https://arxiv.org/pdf/2411.12510" target="_blank">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/SanoScience/PR-ENDO" target="_blank">
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <div class="columns is-centered"><p>
+            This website is based on this website's <a href="https://github.com/sczhou/ProPainter_website" target="_blank">source code</a>. 
+            It's template is based on <a href="https://github.com/nerfies/nerfies.github.io" target="_blank">this</a>. 
+            Thank you!
+          </p></div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+</footer>
+
+  <!-- custom js file  -->
+  <!-- <script defer src="./assets/js/fontawesome.all.min.js"></script> -->
+  <script src="./assets/js/bulma-carousel.min.js"></script>
+  <script src="./assets/js/bulma-slider.min.js"></script>
+  <script src="./assets/js/index.js"></script>
+  <script src="./assets/js/jquery.event.move.js"></script>
+  <script src="./assets/js/jquery.twentytwenty.js"></script>
+  <script src="./assets/js/jquery.twentytwentysingle.js"></script>
+  <script>
+  $(function(){
+    $(".twentytwenty-container").twentytwenty();
+    // $(".twentytwenty-container", "#results-carousel").twentytwenty({default_offset_pct: 0.5, ratio: 0.5});
+  });
+  </script>
+  <script src="assets/js/script.js"></script>
+
+  <script>
+      new BeforeAfter({
+          id: '#example1'
+      });
+      new BeforeAfter({
+          id: '#example2'
+      });
+      new BeforeAfter({
+          id: '#example4'
+      });
+  </script>
+</body>
+</html>

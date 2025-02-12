@@ -1,0 +1,143 @@
+/* Shangchen */
+.logo img {
+    width: 210px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #f00;
+}
+
+.logo img:hover {
+    width: 210px;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #f00;
+}
+
+.container.is-max-desktop.head {
+    max-width: 95%;
+}
+
+.button.is-rounded:hover {
+    transform: scale(1.02);
+    background-color: #fb5a42;
+}
+
+/* Smaller than standard 960 (devices and browsers) */
+@media only screen and (max-width: 959px) {
+}
+
+/* Tablet Portrait size to standard 960 (devices and browsers) */
+@media only screen and (min-width: 768px) and (max-width: 959px) {
+}
+
+/* All Mobile Sizes (devices and browser) */
+@media only screen and (max-width: 767px) {
+
+}
+
+
+
+
+
+
+
+
+.video-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.video-box video {
+  max-width: 48%;
+  height: auto;
+  border-radius: 10px;
+}
+
+
+
+
+.video-container video {
+    display: none;
+  }
+  
+  .video-container #video1.active {
+    display: block;
+    margin: auto;
+  }
+  
+  .video-container #video2.active {
+    display: block;
+    margin: auto;
+  }
+  
+  .video-container #video3.active {
+    display: block;
+    margin: auto;
+  }
+
+
+
+.toggle-container {
+    margin: 30px auto 0;
+    color: white;
+    padding: 90px 0;
+    width: auto;
+    background-color: rgba(255,255,255,1);
+  }
+  
+  .switch {
+    position: relative;
+    height: 32px;
+    width: 300px;
+    margin: 30px auto;
+    background: #F2F2F2;
+    background: #D7D7D7;
+    border-radius: 32px;
+  }
+  .switch-label {
+    font-weight: bold;
+    position: relative;
+    z-index: 2;
+    float: left;
+    width: 100px;
+    line-height: 32px;
+    font-size: 14px;
+    color: #676a6c;
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  .switch-input {
+    display: none;
+  }
+  
+  .switch-input:checked + .switch-label {
+    color: #FFF;
+    transition: 0.15s ease-out;
+    transition-property: color, text-shadow;
+  }
+  
+  .switch-input:checked + .switch-label-y ~ .switch-selector {
+    transform: translateX(0%);
+    background-color: #1AB394;
+  }
+  .switch-input:checked + .switch-label-i ~ .switch-selector {
+    transform: translateX(100%);
+    background-color: #f8ac59;
+  }
+  .switch-input:checked + .switch-label-n ~ .switch-selector {
+    transform: translateX(200%);
+    background-color: #ed5565;
+  }
+  
+  
+  .switch-selector {
+    position: absolute;
+    z-index: 1;
+    top: 0px;
+    left: 0px;
+    display: block;
+    width: 100px;
+    height: 32px;
+    border-radius: 32px;
+    background-color: #1ab394;
+    transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+  }
