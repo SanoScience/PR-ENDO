@@ -27,8 +27,44 @@ We simulate body movements using GaMeS reparameterization.
   <img src="gifs/camera3_sigmt1.gif" alt="Camera Movement 3" width="30%">
 </p>
 
-## Code
-Coming soon!
+## Installation Steps
+
+### Prerequisites
+Ensure you have the following installed:
+- Miniconda or Anaconda
+- NVIDIA GPU with CUDA 12.1 support
+- Python 3.10
+
+#### 1. Create and Activate a Conda Environment
+```
+conda create -n prendo python=3.10 -y
+conda activate prendo
+```
+
+#### 2. Install PyTorch and CUDA Dependencies
+```
+conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=12.1 -c pytorch -c nvidia
+```
+#### 3. Install Required Python Packages
+```
+pip install tqdm lpips plyfile matplotlib natsort pytorch_ssim pytorch_msssim imageio[ffmpeg]
+```
+#### 4. Install Submodules
+```
+pip install submodules/depth-diff-gaussian-rasterization/
+pip install submodules/simple-knn/
+pip install submodules/gaussian-norms/
+```
+#### 5. Install FAISS GPU
+```
+pip install https://github.com/kyamagu/faiss-wheels/releases/download/v1.7.3/faiss_gpu-1.7.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+```
+#### 6. Install Tiny-CUDA-NN
+```
+pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
+```
+
+
 
 ## Citation
 If you find this work useful, please cite:
