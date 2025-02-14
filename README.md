@@ -1,9 +1,11 @@
 # PR-ENDO: Physically Based Relightable Gaussian Splatting for Endoscopy
 
+[![arXiv](https://img.shields.io/badge/arXiv-2411.11024-red)](https://arxiv.org/abs/2411.11024)  [![ProjectPage](https://img.shields.io/badge/Website-gmum.github.io/PRENDO/-blue)](https://sanoscience.github.io/PR-ENDO/)
+
 Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dimensional reconstruction of the environment for real-time novel-view synthesis can significantly enhance diagnosis. We present PR-ENDO, a framework that leverages 3D Gaussian Splatting within a physically based, relightable model tailored for the complex acquisition conditions in endoscopy, such as restricted camera rotations and strong view-dependent illumination. By exploiting the connection between the camera and light source, our approach introduces a relighting model to capture the intricate interactions between light and tissue using physically based rendering and MLP. Existing methods often produce artifacts and inconsistencies under these conditions, which PR-ENDO overcomes by incorporating a specialized diffuse MLP that utilizes light angles and normal vectors, achieving stable reconstructions even with limited training camera rotations. We benchmarked our framework using a publicly available dataset and a newly introduced dataset with wider camera rotations. Our methods demonstrated superior image quality compared to baseline approaches.
 
 
-![PR-ENDO Teaser](teaser.png)
+![PR-ENDO Teaser](assets/imgs/teaser.png)
 
 
 
@@ -12,9 +14,9 @@ We separate light from the camera, adjust light direction, and spotlight angle f
 
 
 <p align="center">
-  <img src="gifs/rotatelight_mediumspotlight231.gif" alt="Rotating Light 1" width="30%">
-  <img src="gifs/rotatelight_mediumspotlight239.gif" alt="Rotating Light 2" width="30%">
-  <img src="gifs/rotatelight_mediumspotlight479.gif" alt="Rotating Light 3" width="30%">
+  <img src="assets/gifs/rotatelight_mediumspotlight231.gif" alt="Rotating Light 1" width="30%">
+  <img src="assets/gifs/rotatelight_mediumspotlight239.gif" alt="Rotating Light 2" width="30%">
+  <img src="assets/gifs/rotatelight_mediumspotlight479.gif" alt="Rotating Light 3" width="30%">
 </p>
 
 
@@ -22,9 +24,9 @@ We separate light from the camera, adjust light direction, and spotlight angle f
 We simulate body movements using GaMeS reparameterization.
 
 <p align="center">
-  <img src="gifs/camera0_sigmt2.gif" alt="Camera Movement 1" width="30%">
-  <img src="gifs/camera0_transt4b.gif" alt="Camera Movement 2" width="30%">
-  <img src="gifs/camera3_sigmt1.gif" alt="Camera Movement 3" width="30%">
+  <img src="assets/gifs/camera0_sigmt2.gif" alt="Camera Movement 1" width="30%">
+  <img src="assets/gifs/camera0_transt4b.gif" alt="Camera Movement 2" width="30%">
+  <img src="assets/gifs/camera3_sigmt1.gif" alt="Camera Movement 3" width="30%">
 </p>
 
 ## Installation Steps
@@ -47,7 +49,7 @@ conda install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=
 ```
 #### 3. Install Required Python Packages
 ```
-pip install tqdm lpips plyfile matplotlib natsort pytorch_ssim pytorch_msssim imageio[ffmpeg]
+pip install tqdm lpips plyfile matplotlib natsort pytorch_ssim pytorch_msssim imageio[ffmpeg] openexr
 ```
 #### 4. Install Submodules
 ```
@@ -63,6 +65,27 @@ pip install https://github.com/kyamagu/faiss-wheels/releases/download/v1.7.3/fai
 ```
 pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
+
+## Training
+
+To train the model, follow these steps:
+
+1. **Prepare the Data**\
+   Before running the training, you must process the data using EndoGSLAM. The dataset should be structured correctly, with scenes organized under the `CV3D/...` directory.
+
+2. **Update the Data Path**\
+   Before executing the training script, ensure you set the correct data path in `run_all.sh`. Locate the following line:
+   ```bash
+   base_path=""
+   ```
+   and update it with the appropriate dataset path.
+
+3. **Run Training**\
+   Once the data is prepared, start the training process by executing the script:
+   ```bash
+   ./run_all.sh
+   ```
+   This script will handle the full training pipeline.
 
 
 
