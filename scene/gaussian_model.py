@@ -251,33 +251,17 @@ class GaussianModel:
         #For debug: set manually params
         #light_intensity, attenuation_k, attenuation_power = 2, 0.3, 3
         
-        # ------ HOW TO SET LIGHT DIRECTION - 4 tested options.
-
+        # ------ HOW TO SET LIGHT DIRECTION - either basic version, or with d optimized
         # light dir == view dir - the basic option
         dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
         dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
-        
-        # #Light normal == camera normal - not sure if correct to only use normal
-        # R = w2c[:3, :3]
-        # light_R = R[:,2]
-        # dir_pp_light = torch.nn.functional.normalize(light_R, dim=0)
-        # dir_pp_light=dir_pp_light.repeat(self.get_features.shape[0], 1)
 
-        # Light rotation relative to camera normal was optimized
-        # R = w2c[:3, :3]
-        # rotation_matrix = light_rotation.reshape(3,3)
-        # light_R = (rotation_matrix @ R)[:,2]
-        # dir_pp_light = torch.nn.functional.normalize(light_R, dim=0)
-        # dir_pp_light=dir_pp_light.repeat(self.get_features.shape[0], 1)
-
-        
-        # # light direction is computed like view dir but rotated a bit. Is it really a case
-        # rotation_matrix = light_rotation.reshape(3,3)
+        # # light source is offset by d 
+        # offset = light_adjustment[:3]
+        # light_center = light_center_raw+offset
         # dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
         # dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
-        # dir_pp_light = dir_pp_light @ rotation_matrix.T
-        # dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
- 
+        
         #--------------
         
         
