@@ -9,8 +9,8 @@ Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dim
 
 
 
-## Separate Light from Camera
-We separate light from the camera, adjust light direction, and spotlight angle for realistic relightning effects.
+## Separate Light effects from Tissue properties
+We separate light effects from tissue properties, adjust light direction and spotlight angle for realistic relightning effects.
 
 
 <p align="center">
