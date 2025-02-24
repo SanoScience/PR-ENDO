@@ -77,7 +77,7 @@ To train the model, follow these steps:
    ```bash
    base_path=""
    ```
-   and update it with the appropriate dataset path.
+   and update it with the appropriate dataset path to `C3VD` folder (`C3VD_endogslam_optimized` should be found automatically).
 
 3. **Run Training**\
    Once the data is prepared, start the training process by executing the script:
