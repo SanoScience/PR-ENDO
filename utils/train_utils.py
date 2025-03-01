@@ -191,37 +191,38 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     torchvision.utils.save_image(image_random_mlp, os.path.join(gif_dir, f'{viewpoint.image_name}_lit_rotated_pose' + ".png"))
 
                     # ----------------------------
-                    # Function to interpolate matrices for smooth rotations.
+                    # Function to interpolate matrices for smooth rotations. Only in last test iteration
                     # ----------------------------
 
-                    interpolated_cameras = interpolate_cameras(viewpoint, rotated_camera, steps=20)
-                    gif_imgs = []
-
-                    for camera_rotated in interpolated_cameras:
-                        cam_center = camera_rotated.camera_center
-
-                        override_color = scene.gaussians.compute_lighted_rgb(
-                            camera_center=cam_center, 
-                            light=scene.light, 
-                            iter=iteration
-                        )
-
-                        image_random_interp = torch.clamp(
-                            renderFunc(
-                                camera_rotated, 
-                                scene.gaussians, 
-                                *renderArgs, 
-                                override_color=override_color
-                            )["render"], 
-                            0.0, 1.0
-                        )
-                        pil_rendering = torchvision.transforms.functional.to_pil_image(image_random_interp)
-                        gif_imgs.append(pil_rendering)
-
-                    writer = imageio.get_writer(f"{gif_dir}/{viewpoint.image_name}.mp4", fps=20)
-                    for img in gif_imgs:
-                        writer.append_data(np.array(img))
-                    writer.close()
+                    if iteration==testing_iterations[-1]: 
+                        interpolated_cameras = interpolate_cameras(viewpoint, rotated_camera, steps=20)
+                        gif_imgs = []
+    
+                        for camera_rotated in interpolated_cameras:
+                            cam_center = camera_rotated.camera_center
+    
+                            override_color = scene.gaussians.compute_lighted_rgb(
+                                camera_center=cam_center, 
+                                light=scene.light, 
+                                iter=iteration
+                            )
+    
+                            image_random_interp = torch.clamp(
+                                renderFunc(
+                                    camera_rotated, 
+                                    scene.gaussians, 
+                                    *renderArgs, 
+                                    override_color=override_color
+                                )["render"], 
+                                0.0, 1.0
+                            )
+                            pil_rendering = torchvision.transforms.functional.to_pil_image(image_random_interp)
+                            gif_imgs.append(pil_rendering)
+    
+                        writer = imageio.get_writer(f"{gif_dir}/{viewpoint.image_name}.mp4", fps=20)
+                        for img in gif_imgs:
+                            writer.append_data(np.array(img))
+                        writer.close()
                     # ----------------------------
 
                 l1_test.append(l1_loss(image_mlp, gt_image).mean().double())
