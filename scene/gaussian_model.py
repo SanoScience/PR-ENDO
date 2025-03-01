@@ -64,7 +64,6 @@ class GaussianModel:
     def setup_mlp(self):
             self.mlp_W = 128 #128
             self.mlp_D = 4 #4
-            self.positional_encoding_gauss = HashGrid(input_dim=3).cuda()
             self.positional_encoding_camera = HashGrid(input_dim=4).cuda() #actually used
 
             #encoding_dims = 16 #we can have it hardcoded, 24 for bigger hashgrid, 16 for vd3dgs
