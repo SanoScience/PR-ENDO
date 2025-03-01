@@ -177,18 +177,16 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     render_dis_ref = torch.clamp(renderFunc(viewpoint, scene.gaussians, *renderArgs, override_color=override_color)["render"], 0.0, 1.0)
                     tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/disable_reflections", render_dis_ref[None], global_step=iteration)
 
+                    
+                    # Rotations
                     # Create custom camera and rotate
                     rotated_camera = rotate_camera(viewpoint, gt_image)
-        
-                    # #---------
-                    image_random = torch.clamp(renderFunc(viewpoint, scene.gaussians, *renderArgs)["render"], 0.0, 1.0)
-                    tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/render_random_base", image_random[None], global_step=iteration)
 
                     override_color = scene.gaussians.compute_lighted_rgb(camera_center = rotated_camera.camera_center, light = scene.light, iter=iteration)
-                    image_random_mlp = torch.clamp(renderFunc(viewpoint, scene.gaussians, *renderArgs, override_color=override_color)["render"], 0.0, 1.0)
+                    image_random_mlp = torch.clamp(renderFunc(rotated_camera, scene.gaussians, *renderArgs, override_color=override_color)["render"], 0.0, 1.0)
 
-                    tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/render_random_lit", image_random_mlp[None], global_step=iteration)
-                    torchvision.utils.save_image(image_random_mlp, os.path.join(gif_dir, f'{viewpoint.image_name}_lit_rotated_pose' + ".png"))
+                    tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/relit_rotated_pose", image_random_mlp[None], global_step=iteration)
+                    torchvision.utils.save_image(image_random_mlp, os.path.join(gif_dir, f'{viewpoint.image_name}_relit_rotated_pose' + ".png"))
 
                     # ----------------------------
                     # Function to interpolate matrices for smooth rotations. Only in last test iteration
