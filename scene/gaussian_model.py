@@ -214,7 +214,7 @@ class GaussianModel:
             light_gauss_dist = light_gauss_dist+noise
 
         input = torch.cat([
-                           self.compute_positional_encoding_camera(L, light_gauss_dist),
+                           # self.compute_positional_encoding_camera(L, light_gauss_dist),
                            light_gauss_dist,
                            N, L, torch.sum(N * L, dim=1, keepdim=True)
                            ], dim=1)
