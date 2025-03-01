@@ -190,8 +190,7 @@ class GaussianModel:
     
     
     def compute_positional_encoding_camera(self, L, dist):
-        """ together gaussians positions and camera position. 
-        We can think of camera as individual gaussian light """
+        """ We can think of camera as individual gaussian light """
         
         cat_encodings = self.positional_encoding_camera(torch.cat([L, dist], dim=1)) 
 
