@@ -58,8 +58,6 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
     makedirs(render_path, exist_ok=True)
     makedirs(gts_path, exist_ok=True)
-    makedirs(seaprate_path_fixed_cam, exist_ok=True)
-    makedirs(seaprate_path_fixed_light, exist_ok=True)
     makedirs(disable_reflections_path, exist_ok=True)
     makedirs(albedo_path, exist_ok=True)
     makedirs(normal_path, exist_ok=True)
