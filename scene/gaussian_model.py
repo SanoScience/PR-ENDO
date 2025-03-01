@@ -188,14 +188,6 @@ class GaussianModel:
         sh2rgb = eval_sh(self.active_sh_degree, shs_view, dir_pp_normalized)
         return sh2rgb +0.5 #torch.clamp_min(sh2rgb + 0.5, 0.0)
     
-    def compute_positional_encoding(self, normal):
-        """ together gaussians positions and camera position. 
-        We can think of camera as individual gaussian light """
-        
-        gauss_input = normal
-        cat_encodings = torch.cat([self.positional_encoding_gauss(gauss_input), 
-                                   ], dim=1)
-        return cat_encodings
     
     def compute_positional_encoding_camera(self, L, dist):
         """ together gaussians positions and camera position. 
