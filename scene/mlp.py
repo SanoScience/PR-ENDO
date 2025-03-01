@@ -104,7 +104,7 @@ class MLP(nn.Module):
             raise NotImplemented('sh>3 not implemented')
         self.encoding_dims = encoding_dims
 
-        self.inputs_dim = self.distance_dims + self.viewdir_dims*2  +self.cos_dim +self.encoding_dims*1 # + self.color_dims
+        self.inputs_dim = self.distance_dims + self.viewdir_dims*2  +self.cos_dim #+self.encoding_dims
                            
 
         # encoding layers
