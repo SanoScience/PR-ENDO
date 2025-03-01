@@ -236,25 +236,26 @@ class GaussianModel:
     def compute_lighted_rgb(self, camera_center, light, ret_loss=False, iter = 0, randomize_input=False, disable_reflections = False, light_center_sep=None):
         
         if torch.is_tensor(light_center_sep):
-            light_center=light_center_sep
+            light_center_raw = light_center_sep
         else:
-            light_center = camera_center
+            light_center_raw = camera_center
 
         base_color = self.compute_gaussian_rgb(camera_center)
 
         #Light color is [1,1,1,]
-        light_intensity, attenuation_k, attenuation_power, light_rotation = light[0], light[1], light[2], light[3:12]
+        light_intensity, attenuation_k, attenuation_power, light_adjustment = light[0], light[1], light[2], light[3:12]
 
         #For debug: set manually params
         #light_intensity, attenuation_k, attenuation_power = 2, 0.3, 3
         
         # ------ HOW TO SET LIGHT DIRECTION - either basic version, or with d optimized
         # light dir == view dir - the basic option
+        light_center = light_center_raw
         dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
         dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
 
         # # light source is offset by d 
-        # offset = light_adjustment[:3]
+        # offset = light_adjustment[:3] #only couple of entries for light adjustment are finally needed
         # light_center = light_center_raw+offset
         # dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
         # dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
