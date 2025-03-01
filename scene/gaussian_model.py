@@ -106,7 +106,7 @@ class GaussianModel:
         self.start_mlp_iter =1000 #defined only here
         self.random_noise_val = 0.005 # will be overwritten in training_setup()
         self.end_diffuse_loss_iter = 3000 # will be overwritten in training_setup()
-        self.max_scale = 100000 # will be overwritten in training_setup()
+        self.max_scale = 0.1 # Hardcoded
     
 
 
@@ -465,7 +465,6 @@ class GaussianModel:
             self.lambda_norm = training_args.lambda_norm
             self.end_diffuse_loss_iter=training_args.end_diffuse_loss_iter
             self.random_noise_val = training_args.random_noise_val
-            self.max_scale = training_args.max_scale
 
             
         l_mlp = [
