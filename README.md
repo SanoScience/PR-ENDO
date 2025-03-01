@@ -87,7 +87,7 @@ To train the model, follow these steps:
    This script will handle the full training pipeline.
 
 
-Incoming: scripts for tissue deformations, challenging rotations and light rotations.
+Coming soon: scripts for tissue deformations, challenging rotations and light rotations.
 
 ## Citation
 If you find this work useful, please cite:
