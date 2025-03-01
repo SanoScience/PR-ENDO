@@ -244,9 +244,6 @@ class GaussianModel:
 
         #Light color is [1,1,1,]
         light_intensity, attenuation_k, attenuation_power, light_rotation = light[0], light[1], light[2], light[3:12]
-        
-        coeff_diffuse=1
-        coeff_spec=1
 
         #For debug: set manually params
         #light_intensity, attenuation_k, attenuation_power = 2, 0.3, 3
@@ -276,12 +273,15 @@ class GaussianModel:
 
         # Normalize the input vectors
         N = torch.nn.functional.normalize(normal, dim=1)
-        L = -torch.nn.functional.normalize(dir_pp_light, dim=1) #mult by -1, ask Asia if you need this
-        V = -torch.nn.functional.normalize(dir_pp_camera, dim=1) # mult by -1, ask Asia if you need this
+        L = -torch.nn.functional.normalize(dir_pp_light, dim=1) 
+        V = -torch.nn.functional.normalize(dir_pp_camera, dim=1)
         
         # normals always towards camera
         N_dot_V = torch.sum(N * V, dim=1, keepdim=True)  # [N, 1]
         N = torch.where(N_dot_V < 0, -N, N)  # Flip N if N_dot_V < 0
+
+        # cosine
+        N_dot_L = torch.clamp(torch.sum(N * L, dim=1, keepdim=True), min=0.0)
         
         # Compute distance attenuation (light intensity fades with distance)
         attenuation_raw_coeffs = 1.0 / (1.0 + attenuation_k * (light_gauss_dist) ** attenuation_power)
@@ -292,12 +292,10 @@ class GaussianModel:
             base_color, light_gauss_dist, N, L, randomize_input=randomize_input)
 
         # Diffuse component - from MLP
-        I_diffuse_color_mlp = light_intensity  * diffuse_component_mlp * attenuation_coeffs * base_color
+        I_diffuse_color_mlp = light_intensity  * diffuse_component_mlp * attenuation_coeffs * base_color * N_dot_L
 
         #Diffuse component - from coefficients
-        N_dot_L = torch.clamp(torch.sum(N * L, dim=1, keepdim=True), min=0.0)
-        diffuse_component_coeffs = coeff_diffuse * N_dot_L
-        I_diffuse_color_coeffs = light_intensity  * diffuse_component_coeffs * attenuation_coeffs * base_color
+        I_diffuse_color_coeffs = light_intensity  * N_dot_L * attenuation_coeffs * base_color
         
 
         # ======== PBR reflections
@@ -328,19 +326,16 @@ class GaussianModel:
         G = G1_V * G1_L
 
         # Final Cook-Torrance specular term
-        specular_component_coeffs = coeff_spec * (fresnel * D * G) / (4 * N_dot_V_clamped * N_dot_L_clamped + 1e-5)
-        I_specular_coeffs = light_intensity * attenuation_coeffs * specular_component_coeffs
+        specular_component_coeffs = (fresnel * D * G) / (4 * N_dot_V_clamped * N_dot_L_clamped + 1e-5)
+        I_specular_coeffs = light_intensity * attenuation_coeffs * specular_component_coeffs*N_dot_L
 
 
-        # Specular component -> actually its all from coeffs. We keep it to avoid errors, needs to be cleaned for final
-        I_specular_mlp = light_intensity * attenuation_coeffs * specular_component_coeffs
-
-
+      
         if iter>self.start_mlp_iter: #warmup for Light params + diffuse MLP
             # Total illumination
-            I_diffuse_rough, I_specular_rough, _ = I_diffuse_color_mlp*(1-fresnel),  I_specular_mlp, attenuation_coeffs
+            I_diffuse_rough, I_specular_rough, _ = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
         else:
-            I_diffuse_rough, I_specular_rough, _  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs, attenuation_coeffs
+            I_diffuse_rough, I_specular_rough, _  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
 
 
         
@@ -348,8 +343,7 @@ class GaussianModel:
             
 
         if ret_loss:
-            atten_loss = 0 #attenuation_loss(light_gauss_dist, attenuation_raw_mlp) - nie uzywamy
-            
+            atten_loss = 0 
             if iter<=self.start_mlp_iter:
                 # at the begining we "initialize"  mlp with coeff values. it prevents from collapse
                 linear_loss_factor = 1.0
@@ -362,9 +356,9 @@ class GaussianModel:
                     (((diffuse_component_coeffs - diffuse_component_mlp)**2)
                     )
             
-            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).sum()
-            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).sum()
-            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).sum() 
+            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).mean()*(10**6)
+            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()*(10**6)
+            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()*(10**6)
                         
             
         if disable_reflections:
