@@ -28,9 +28,9 @@ for seq in "${sequences[@]}"; do
     echo "Processing sequence: $sequence_path with model path: $model_path"
 
     # for cecum_t1_b, cecum_t2_b we use mlp_lr 0.0001
-    python train_viewdir.py --model_path "$model_path" --eval --iteration 40000 -s "$sequence_path" --lambda_depth 0.2 --albedo_loss_weight 0.000001 \
+    python train_viewdir.py --model_path "$model_path" --eval --iteration 40000 -s "$sequence_path" --lambda_depth 0.2 --albedo_loss_weight 0.00001 \
     --densification_interval 1000 --opacity_reset_interval 3000 --densify_until_iter 10000 --densify_from_iter 1000 --mlp_lr 0.001 --grid_lr 0.001 \
-    --end_diffuse_loss_iter 30000 --port 6200 --K_normals 100 --max_scale 0.1 --lambda_norm 0.1
+    --end_diffuse_loss_iter 30000 --port 6200 --K_normals 100 --lambda_norm 0.1
     python render.py --model_path "$model_path" --eval -s "$sequence_path" --skip_train --iteration 40000
     
 done
