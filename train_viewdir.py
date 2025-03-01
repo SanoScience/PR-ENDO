@@ -208,7 +208,7 @@ def training(dataset, opt, pipe, args):
         # Add diffuse and tissue consistency losses
     
         #exception! diffuse loss can be only applied to visible gaussians. Otherwise we  get incorrectly assumed values
-        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].sum()
+        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].mean()*(10**6) #TODO change 10**6 here and args
         loss += opt.albedo_loss_weight * albedo_loss
         loss += opt.roughness_loss_weight * roughness_loss
         loss += opt.f0_loss_weight * f0_loss
