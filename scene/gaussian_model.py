@@ -267,7 +267,7 @@ class GaussianModel:
 
         dir_pp_camera = (self.get_xyz - camera_center.repeat(self.get_features.shape[0], 1))
         camera_gauss_dist = dir_pp_camera.norm(dim=1, keepdim=True) / self.spatial_lr_scale 
-        # self.spatial_lr_scale  - its scene radius, don't know why they named it like that
+        # self.spatial_lr_scale  - its scene radius
 
         normal = self.get_gaussian_normals()[:, 3:]
 
@@ -343,7 +343,7 @@ class GaussianModel:
             
 
         if ret_loss:
-            atten_loss = 0 
+            atten_loss = 0 #not used
             if iter<=self.start_mlp_iter:
                 # at the begining we "initialize"  mlp with coeff values. it prevents from collapse
                 linear_loss_factor = 1.0
@@ -356,9 +356,9 @@ class GaussianModel:
                     (((diffuse_component_coeffs - diffuse_component_mlp)**2)
                     )
             
-            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).mean()*(10**6)
-            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()*(10**6)
-            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()*(10**6)
+            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
+            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
+            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
                         
             
         if disable_reflections:
