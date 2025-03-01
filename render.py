@@ -80,28 +80,12 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
         rendering = renderpkg["render"].clamp(0,1)
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
-
-        override_color = gaussians.compute_lighted_rgb(camera_center = view.camera_center, light = light, iter = loaded_iter, light_center_sep=first_cam)
-        renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
-        rendering = renderpkg["render"].clamp(0,1)
-        torchvision.utils.save_image(rendering, os.path.join(seaprate_path_fixed_light, '{0:05d}'.format(idx) + ".png"))
-
-        # fix cam, remember to change settings
-        override_color = gaussians.compute_lighted_rgb(camera_center = middle_cam.camera_center, light = light, iter = loaded_iter, light_center_sep=view.camera_center)
-        renderpkg = render(middle_cam, gaussians, pipeline, background, override_color = override_color)
-        rendering = renderpkg["render"].clamp(0,1)
-        torchvision.utils.save_image(rendering, os.path.join(seaprate_path_fixed_cam, '{0:05d}'.format(idx) + ".png"))
         
         if idx in random_ids:
             override_color = gaussians.compute_lighted_rgb(camera_center = view.camera_center, light = light, iter = loaded_iter, disable_reflections=True)
             renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
             rendering = renderpkg["render"].clamp(0,1)
             torchvision.utils.save_image(rendering, os.path.join(disable_reflections_path, '{0:05d}'.format(idx) + ".png"))
-
-            override_color = gaussians.compute_gaussian_rgb(view.camera_center)
-            renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
-            rendering = renderpkg["render"].clamp(0,1)
-            torchvision.utils.save_image(rendering, os.path.join(albedo_path, '{0:05d}'.format(idx) + ".png"))
 
             override_color = gaussians.compute_gaussian_rgb(view.camera_center)
             renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
@@ -128,8 +112,9 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     
     # Make videos
     generate_video(render_path, "renders")
-    generate_video(seaprate_path_fixed_light, "seaprate_cam_light_fixed_light")
-    generate_video(seaprate_path_fixed_cam, "seaprate_cam_light_fixed_cam")
+    generate_video(albedo_path, "albedo")
+    generate_video(disable_reflections_path, "disable_refl")
+    generate_video(normal_path, "normals")
 
 
     # Performence check
