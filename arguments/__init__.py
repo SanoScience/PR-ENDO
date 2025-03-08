@@ -83,15 +83,13 @@ class OptimizationParams(ParamGroup):
         self.opacity_lr = 0.05
         self.scaling_lr = 0.005
         self.rotation_lr = 0.001
-        self.max_scale = 10000000.0
+        self.max_scale = 0.1
         
         # pbr gaussian lrs
-        self.shininess_lr = 0.001
         self.roughness_lr = 0.002
         self.f0_lr = 0.002
 
         # pbr gaussian init values
-        self.shininess_init = 32 # only used in phong
         self.roughness_init = 0.5
         self.f0_init = 0.05
 
@@ -118,11 +116,10 @@ class OptimizationParams(ParamGroup):
 
         #our losses params
         self.end_diffuse_loss_iter = 1000000
-        self.atten_loss_weight = 1e-3 # not used. We get attenuation from coeffs
-        self.diffuse_loss_weight = 1e-6
-        self.albedo_loss_weight = 1e-6
-        self.roughness_loss_weight = 1e-6
-        self.f0_loss_weight = 1e-6
+        self.diffuse_loss_weight = 1.0
+        self.albedo_loss_weight = 1.0
+        self.roughness_loss_weight = 1.0
+        self.f0_loss_weight = 1.0
 
         
         # densification arguments

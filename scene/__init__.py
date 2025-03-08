@@ -99,7 +99,6 @@ class Scene:
             self.gaussians.spatial_lr_scale = self.cameras_extent
             try:
                 self.gaussians.mlp.load_state_dict(torch.load(self.model_path + "/chkpnt_mlp" + str(self.loaded_iter) + ".pth"))
-                self.gaussians.positional_encoding_gauss.load_state_dict(torch.load(self.model_path + "/chkpnt_grid_gauss" + str(self.loaded_iter) + ".pth"))
                 self.gaussians.positional_encoding_camera.load_state_dict(torch.load(self.model_path + "/chkpnt_grid_camera" + str(self.loaded_iter) + ".pth"))
 
                 self.light = torch.load(self.model_path + "/chkpnt_light" + str(self.loaded_iter) + ".pth")

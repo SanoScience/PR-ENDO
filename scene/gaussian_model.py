@@ -64,13 +64,9 @@ class GaussianModel:
     def setup_mlp(self):
             self.mlp_W = 128 #128
             self.mlp_D = 4 #4
-            self.positional_encoding_camera = HashGrid(input_dim=4).cuda() #actually used
+            self.positional_encoding_camera = HashGrid(input_dim=4).cuda()
 
-            #encoding_dims = 16 #we can have it hardcoded, 24 for bigger hashgrid, 16 for vd3dgs
-            # or we can check it to automatically assign value:
-            encoding_dims = self.positional_encoding_gauss.encoding.n_output_dims
-            print("HASHGRID DIMS", encoding_dims)
-
+            encoding_dims = self.positional_encoding_camera.encoding.n_output_dims
             self.mlp = MLP(self.max_sh_degree, self.mlp_W, self.mlp_D, encoding_dims=encoding_dims).cuda()
 
 
@@ -105,7 +101,7 @@ class GaussianModel:
         self.start_mlp_iter =1000 #defined only here
         self.random_noise_val = 0.005 # will be overwritten in training_setup()
         self.end_diffuse_loss_iter = 3000 # will be overwritten in training_setup()
-        self.max_scale = 0.1 # Hardcoded
+        self.max_scale = 0.1 # defined only here, TODO: parametrize
     
 
 
@@ -125,7 +121,6 @@ class GaussianModel:
             self.spatial_lr_scale,
             self.roughness,
             self.F_0,
-            self.shininess
         )
     
     def restore(self, model_args, training_args):
@@ -142,8 +137,7 @@ class GaussianModel:
         opt_dict, 
         self.spatial_lr_scale, 
         self.roughness,
-        self.F_0,
-        self.shininess) = model_args
+        self.F_0) = model_args
         self.training_setup(training_args)
         self.xyz_gradient_accum = xyz_gradient_accum
         self.denom = denom
@@ -202,12 +196,12 @@ class GaussianModel:
             n, mult = N.shape
             noise = torch.cuda.FloatTensor(n, mult).normal_() * random_noise_value
             N = N+noise
-            N = N/N.norm(dim=1, keepdim=True)
+            N = N/(N.norm(dim=1, keepdim=True)+self.eps_s0)
 
             n, mult = L.shape
             noise = torch.cuda.FloatTensor(n, mult).normal_() * random_noise_value
             L = L+noise
-            L = L/L.norm(dim=1, keepdim=True)
+            L = L/(L.norm(dim=1, keepdim=True)+self.eps_s0)
 
             n, mult = light_gauss_dist.shape
             noise = torch.cuda.FloatTensor(n, mult).normal_() * random_noise_value
@@ -219,8 +213,8 @@ class GaussianModel:
                            N, L, torch.sum(N * L, dim=1, keepdim=True)
                            ], dim=1)
         output = self.mlp(input)
-        #We only take 1 value for diffuse (albedo can be lightened/darkened with white light[1,1,1]; 1 value for specular, 1 value for attenuation at given point)
-        return output[:,2:3], output[:,3:4], output[:,4:5] 
+        #We only take 3 values for diffuse (albedo can be lightened/darkened with white light[1,1,1]; other values only experimental and not used
+        return output[:,2:5], output[:,3:4], output[:,4:5] 
     
 
     def compute_lighted_rgb(self, camera_center, light, ret_loss=False, iter = 0, randomize_input=False, disable_reflections = False, light_center_sep=None):
@@ -275,17 +269,18 @@ class GaussianModel:
         N_dot_L = torch.clamp(torch.sum(N * L, dim=1, keepdim=True), min=0.0)
         
         # Compute distance attenuation (light intensity fades with distance)
-        attenuation_raw_coeffs = 1.0 / (1.0 + attenuation_k * (light_gauss_dist) ** attenuation_power)
+        denom_A = (1.0 + attenuation_k * (light_gauss_dist) ** attenuation_power)
+        attenuation_raw_coeffs = 1.0 / (denom_A + (denom_A == 0).float() * 1e-6)
         attenuation_coeffs = torch.clamp(attenuation_raw_coeffs, 0, 1)
         
         # get preds from diffuseMLP
         diffuse_component_mlp, _, _ = self.compute_mlp_outputs(
             base_color, light_gauss_dist, N, L, randomize_input=randomize_input)
 
-        # Diffuse component - from MLP
-        I_diffuse_color_mlp = light_intensity  * diffuse_component_mlp * attenuation_coeffs * base_color * N_dot_L
+        # Diffuse component - from MLP, light transfer eq
+        I_diffuse_color_mlp = light_intensity  *(base_color * diffuse_component_mlp) * attenuation_coeffs * N_dot_L
 
-        #Diffuse component - from coefficients
+        #Diffuse component - from coefficients, light transfer eq
         I_diffuse_color_coeffs = light_intensity  * N_dot_L * attenuation_coeffs * base_color
         
 
@@ -296,37 +291,40 @@ class GaussianModel:
         
         # Fresnel Effect (Schlick's approximation) for non-metals (F0 = 0.04) -value from gpt
         fresnel = self.get_F_0 + (1 - self.get_F_0) * (1 - torch.sum(H * V, dim=1, keepdim=True)) ** 5
-        # for debug set manually fresnel
-        #fresnel = 0.02 + (1 - 0.02) * (1 - torch.sum(H * V, dim=1, keepdim=True)) ** 5
-
+        
         # Specular component using Cook-Torrance model
         N_dot_H = torch.clamp(torch.sum(N * H, dim=1, keepdim=True), min=0.0)
         alpha = (self.get_roughness) ** 2
-        # for debug set manually alpha
-        #alpha = (0.3) ** 2
+        
 
         # Microfacet distribution function (Trowbridge-Reitz GGX)
-        D = (alpha ** 2) / (torch.pi * ((N_dot_H ** 2) * (alpha ** 2 - 1) + 1) ** 2)
+        denom_D = (torch.pi * ((N_dot_H ** 2) * (alpha ** 2 - 1) + 1) ** 2)        
+        D = (alpha ** 2) / (denom_D + (denom_D == 0).float() * 1e-6)
 
         # Geometric attenuation (Smith GGX)
         k = (self.roughness + 1) ** 2 / 8
         N_dot_V_clamped = torch.clamp(torch.sum(N * V, dim=1, keepdim=True), min=0.0)
         N_dot_L_clamped = torch.clamp(N_dot_L, min=0.0)
-        G1_V = N_dot_V_clamped / (N_dot_V_clamped * (1 - k) + k)
-        G1_L = N_dot_L_clamped / (N_dot_L_clamped * (1 - k) + k)
+        
+        denom_V = N_dot_V_clamped * (1 - k) + k
+        denom_L = N_dot_L_clamped * (1 - k) + k
+        G1_V = N_dot_V_clamped / (denom_V + (denom_V == 0).float() * 1e-6)
+        G1_L = N_dot_L_clamped / (denom_L + (denom_L == 0).float() * 1e-6)
+        
         G = G1_V * G1_L
 
         # Final Cook-Torrance specular term
-        specular_component_coeffs = (fresnel * D * G) / (4 * N_dot_V_clamped * N_dot_L_clamped + 1e-5)
+        spec_denom = (4 * N_dot_V_clamped * N_dot_L_clamped)
+        specular_component_coeffs =  (fresnel * D * G) / (spec_denom + (spec_denom == 0).float() * 1e-6)
         I_specular_coeffs = light_intensity * attenuation_coeffs * specular_component_coeffs*N_dot_L
 
 
       
         if iter>self.start_mlp_iter: #warmup for Light params + diffuse MLP
             # Total illumination
-            I_diffuse_rough, I_specular_rough, _ = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
+            I_diffuse_rough, I_specular_rough = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
         else:
-            I_diffuse_rough, I_specular_rough, _  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
+            I_diffuse_rough, I_specular_rough  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
 
 
         
@@ -336,7 +334,7 @@ class GaussianModel:
         if ret_loss:
             atten_loss = 0 #not used
             if iter<=self.start_mlp_iter:
-                # at the begining we "initialize"  mlp with coeff values. it prevents from collapse
+                # at the begining we "initialize"  mlp with coeff values. 
                 linear_loss_factor = 1.0
             else: 
                 #we add more freedom to diffuse mlp to be able to model more complicated relations
@@ -344,12 +342,12 @@ class GaussianModel:
                     torch.tensor(1- ((iter- self.start_mlp_iter) / (self.end_diffuse_loss_iter - self.start_mlp_iter + 1e-10))), 0, 1)
             
             diffuse_loss = linear_loss_factor * \
-                    (((diffuse_component_coeffs - diffuse_component_mlp)**2)
+                    (((1 - diffuse_component_mlp)**2)
                     )
             
-            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
-            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
-            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()*(10**6) #TODO change 10**6 here and args
+            albedo_loss = ((base_color - base_color.mean(dim=0)) ** 2).mean()
+            roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()
+            f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()
                         
             
         if disable_reflections:
@@ -399,7 +397,6 @@ class GaussianModel:
         features[:, :3, 0 ] = fused_color
         features[:, 3:, 1:] = 0.0
 
-        shininess = (init_args.shininess_init*torch.ones((fused_color.shape[0], 1))).float().cuda()
         roughness = (init_args.roughness_init*torch.ones((fused_color.shape[0], 1))).float().cuda()
         F_0 = (init_args.f0_init*torch.ones((fused_color.shape[0], 1))).float().cuda()
 
@@ -420,7 +417,6 @@ class GaussianModel:
         self._opacity = nn.Parameter(opacities.requires_grad_(True))
         self.max_radii2D = torch.zeros((self.get_xyz.shape[0]), device="cuda")
 
-        self.shininess = nn.Parameter(shininess.requires_grad_(True))
         self.roughness = nn.Parameter(roughness.requires_grad_(True))
         self.F_0 = nn.Parameter(F_0.requires_grad_(True))
 
@@ -441,7 +437,6 @@ class GaussianModel:
                 {'params': [self._opacity], 'lr': training_args.opacity_lr, "name": "opacity"},
                 {'params': [self._scaling], 'lr': training_args.scaling_lr, "name": "scaling"},
                 {'params': [self._rotation], 'lr': training_args.rotation_lr, "name": "rotation"},
-                {'params': [self.shininess], 'lr': training_args.shininess_lr, "name": "shininess"},
                 {'params': [self.roughness], 'lr': training_args.roughness_lr, "name": "roughness"},
                 {'params': [self.F_0], 'lr': training_args.f0_lr, "name": "F_0"},
             ]
@@ -458,7 +453,6 @@ class GaussianModel:
 
             
         l_mlp = [
-            {'params': [*self.positional_encoding_gauss.parameters()], 'lr': training_args.grid_lr, "name": "hash_grid_gauss"},
             {'params': [*self.positional_encoding_camera.parameters()], 'lr': training_args.grid_lr, "name": "hash_grid_camera"},
             {'params': [*self.mlp.parameters()], 'lr': training_args.mlp_lr, "name": "mlp"},]
         self.optimizer_mlp = torch.optim.Adam(l_mlp, lr=0.0, eps=1e-15)
@@ -485,8 +479,6 @@ class GaussianModel:
             l.append('scale_{}'.format(i))
         for i in range(self._rotation.shape[1]):
             l.append('rot_{}'.format(i))
-        for i in range(self.shininess.shape[1]):
-            l.append('shininess_{}'.format(i))
         for i in range(self.roughness.shape[1]):
             l.append('roughness_{}'.format(i))
         for i in range(self.F_0.shape[1]):
@@ -512,14 +504,13 @@ class GaussianModel:
 
         ###
         rotation = self._rotation.detach().cpu().numpy()
-        shininess = self.shininess.detach().cpu().numpy()
         roughness = self.roughness.detach().cpu().numpy()
         F_0 = self.F_0.detach().cpu().numpy()
 
         dtype_full = [(attribute, 'f4') for attribute in self.construct_list_of_attributes()]
 
         elements = np.empty(xyz.shape[0], dtype=dtype_full)
-        attributes = np.concatenate((xyz, normals, f_dc, f_rest, opacities, scale, rotation, shininess, roughness, F_0), axis=1)
+        attributes = np.concatenate((xyz, normals, f_dc, f_rest, opacities, scale, rotation, roughness, F_0), axis=1)
         elements[:] = list(map(tuple, attributes))
         el = PlyElement.describe(elements, 'vertex')
         PlyData([el]).write(path)
@@ -566,12 +557,6 @@ class GaussianModel:
         for idx, attr_name in enumerate(rot_names):
             rots[:, idx] = np.asarray(plydata.elements[0][attr_name])
 
-        shininess_names = [p.name for p in plydata.elements[0].properties if p.name.startswith("shininess")]
-        shininess_names = sorted(shininess_names, key = lambda x: int(x.split('_')[-1]))
-        shininess = np.zeros((xyz.shape[0], len(shininess_names)))
-        for idx, attr_name in enumerate(shininess_names):
-            shininess[:, idx] = np.asarray(plydata.elements[0][attr_name])
-
         roughness_names = [p.name for p in plydata.elements[0].properties if p.name.startswith("roughness")]
         roughness_names = sorted(roughness_names, key = lambda x: int(x.split('_')[-1]))
         roughness = np.zeros((xyz.shape[0], len(roughness_names)))
@@ -590,7 +575,6 @@ class GaussianModel:
         self._opacity = nn.Parameter(torch.tensor(opacities, dtype=torch.float, device="cuda").requires_grad_(True))
         self._scaling = nn.Parameter(torch.tensor(scales, dtype=torch.float, device="cuda").requires_grad_(True))
         self._rotation = nn.Parameter(torch.tensor(rots, dtype=torch.float, device="cuda").requires_grad_(True))
-        self.shininess = nn.Parameter(torch.tensor(shininess, dtype=torch.float, device="cuda").requires_grad_(True))
         self.roughness = nn.Parameter(torch.tensor(roughness, dtype=torch.float, device="cuda").requires_grad_(True))
         self.F_0 = nn.Parameter(torch.tensor(F_0, dtype=torch.float, device="cuda").requires_grad_(True))
 
@@ -640,7 +624,6 @@ class GaussianModel:
         self._opacity = optimizable_tensors["opacity"]
         self._scaling = optimizable_tensors["scaling"]
         self._rotation = optimizable_tensors["rotation"]
-        self.shininess = optimizable_tensors["shininess"]
         self.roughness = optimizable_tensors["roughness"]
         self.F_0 = optimizable_tensors["F_0"]
 
@@ -673,14 +656,13 @@ class GaussianModel:
 
         return optimizable_tensors
 
-    def densification_postfix(self, new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_shininess, new_roughness, new_F_0):
+    def densification_postfix(self, new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_roughness, new_F_0):
         d = {"xyz": new_xyz,
         "f_dc": new_features_dc,
         "f_rest": new_features_rest,
         "opacity": new_opacities,
         "scaling" : new_scaling,
         "rotation" : new_rotation,
-        "shininess": new_shininess,
         "roughness": new_roughness,
         "F_0": new_F_0}
 
@@ -691,7 +673,6 @@ class GaussianModel:
         self._opacity = optimizable_tensors["opacity"]
         self._scaling = optimizable_tensors["scaling"]
         self._rotation = optimizable_tensors["rotation"]
-        self.shininess = optimizable_tensors["shininess"]
         self.roughness = optimizable_tensors["roughness"]
         self.F_0 = optimizable_tensors["F_0"]
 
@@ -734,11 +715,10 @@ class GaussianModel:
         new_features_dc = self._features_dc[selected_pts_mask].repeat(N,1,1)
         new_features_rest = self._features_rest[selected_pts_mask].repeat(N,1,1)
         new_opacity = self._opacity[selected_pts_mask].repeat(N,1)
-        new_shininess = self.shininess[selected_pts_mask].repeat(N,1)
         new_F_0 = self.F_0[selected_pts_mask].repeat(N,1)
         new_roughness = self.roughness[selected_pts_mask].repeat(N,1)
 
-        self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacity, new_scaling, new_rotation, new_shininess, new_roughness, new_F_0)
+        self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacity, new_scaling, new_rotation, new_roughness, new_F_0)
 
         prune_filter = torch.cat((selected_pts_mask, torch.zeros(N * selected_pts_mask.sum(), device="cuda", dtype=bool)))
         self.prune_points(prune_filter)
@@ -755,11 +735,10 @@ class GaussianModel:
         new_opacities = self._opacity[selected_pts_mask]
         new_scaling = self._scaling[selected_pts_mask]
         new_rotation = self._rotation[selected_pts_mask]
-        new_shininess = self.shininess[selected_pts_mask]
         new_roughness = self.roughness[selected_pts_mask]
         new_F_0 = self.F_0[selected_pts_mask]
 
-        self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_shininess, new_roughness, new_F_0)
+        self.densification_postfix(new_xyz, new_features_dc, new_features_rest, new_opacities, new_scaling, new_rotation, new_roughness, new_F_0)
 
     def densify_and_prune(self, max_grad, min_opacity, extent, max_screen_size):
         grads = self.xyz_gradient_accum / self.denom

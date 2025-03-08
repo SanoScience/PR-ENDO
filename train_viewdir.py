@@ -196,7 +196,6 @@ def training(dataset, opt, pipe, args):
 
             print("\n[ITER {}] Saving MLP & GRID Checkpoint".format(iteration))
             torch.save(gaussians.mlp.state_dict(), scene.model_path + "/chkpnt_mlp" + str(iteration) + ".pth")
-            torch.save(gaussians.positional_encoding_gauss.state_dict(), scene.model_path + "/chkpnt_grid_gauss" + str(iteration) + ".pth")
             torch.save(gaussians.positional_encoding_camera.state_dict(), scene.model_path + "/chkpnt_grid_camera" + str(iteration) + ".pth")
             
             print("\n[ITER {}] Saving Light Checkpoint".format(iteration))
@@ -208,7 +207,7 @@ def training(dataset, opt, pipe, args):
         # Add diffuse and tissue consistency losses
     
         #exception! diffuse loss can be only applied to visible gaussians. Otherwise we  get incorrectly assumed values
-        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].mean()*(10**6) #TODO change 10**6 here and args
+        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].mean() #TODO change 10**6 here and args
         loss += opt.albedo_loss_weight * albedo_loss
         loss += opt.roughness_loss_weight * roughness_loss
         loss += opt.f0_loss_weight * f0_loss
@@ -303,7 +302,6 @@ def training(dataset, opt, pipe, args):
 
                 print("\n[ITER {}] Saving MLP & GRID Checkpoint".format(iteration))
                 torch.save(gaussians.mlp.state_dict(), scene.model_path + "/chkpnt_mlp" + str(iteration) + ".pth")
-                torch.save(gaussians.positional_encoding_gauss.state_dict(), scene.model_path + "/chkpnt_grid_gauss" + str(iteration) + ".pth")
                 torch.save(gaussians.positional_encoding_camera.state_dict(), scene.model_path + "/chkpnt_grid_camera" + str(iteration) + ".pth")
                 
                 print("\n[ITER {}] Saving Light Checkpoint".format(iteration))

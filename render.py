@@ -140,7 +140,6 @@ def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParam
         background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
         gaussians.mlp.eval()
         gaussians.positional_encoding_camera.eval()
-        gaussians.positional_encoding_gauss.eval()
 
         if not skip_train:
              render_set(dataset.model_path, "train", scene.loaded_iter, scene.getTrainCameras(), gaussians, pipeline, background, scene.light, scene.loaded_iter)
