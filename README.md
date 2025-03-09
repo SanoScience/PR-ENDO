@@ -87,7 +87,7 @@ To train the model, follow these steps:
    This script will handle the full training pipeline.
 
 
-Coming soon: scripts for tissue deformations and light rotations.  
+Coming soon: script for light rotations.  
 TODO: HG as parameter. Currently to use HG please uncomment
  l. 211 in `scene/gaussian_model.py` and `l.107 in scene/mlp.py`
 
@@ -105,3 +105,5 @@ If you find this work useful, please cite:
       url={https://arxiv.org/abs/2411.12510}
 }
 ```
+
+

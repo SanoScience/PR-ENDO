@@ -5,7 +5,7 @@ export CUDA_VISIBLE_DEVICES=2
 ### C3VD
 
 # Define the base path for your sequences
-base_path="/home/jk/pancakes_physics/data/C3VD"
+base_path="path/to/data/C3VD"
 
 # List of sequences
 sequences=(
