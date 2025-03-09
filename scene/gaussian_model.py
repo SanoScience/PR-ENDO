@@ -30,9 +30,7 @@ import faiss
 import faiss.contrib.torch_utils
 from scene.mlp import MLP, PosEmbedding, HashGrid
 from utils.sh_utils import eval_sh
-from utils.loss_utils import attenuation_loss
 import torch.nn.functional as F
-from utils.augmented_rotation_utils import rotate_matrix_torch
 
 class GaussianModel:
 
@@ -62,8 +60,8 @@ class GaussianModel:
         self.surface_normal = return_surface_normal
     
     def setup_mlp(self):
-            self.mlp_W = 128 #128
-            self.mlp_D = 4 #4
+            self.mlp_W = 128
+            self.mlp_D = 4
             self.positional_encoding_camera = HashGrid(input_dim=4).cuda()
 
             encoding_dims = self.positional_encoding_camera.encoding.n_output_dims
@@ -209,12 +207,11 @@ class GaussianModel:
 
         input = torch.cat([
                            # self.compute_positional_encoding_camera(L, light_gauss_dist),
-                           light_gauss_dist,
+                           base_color, light_gauss_dist,
                            N, L, torch.sum(N * L, dim=1, keepdim=True)
                            ], dim=1)
         output = self.mlp(input)
-        #We only take 3 values for diffuse (albedo can be lightened/darkened with white light[1,1,1]; other values only experimental and not used
-        return output[:,2:5], output[:,3:4], output[:,4:5] 
+        return output
     
 
     def compute_lighted_rgb(self, camera_center, light, ret_loss=False, iter = 0, randomize_input=False, disable_reflections = False, light_center_sep=None):
@@ -228,9 +225,6 @@ class GaussianModel:
 
         #Light color is [1,1,1,]
         light_intensity, attenuation_k, attenuation_power, light_adjustment = light[0], light[1], light[2], light[3:12]
-
-        #For debug: set manually params
-        #light_intensity, attenuation_k, attenuation_power = 2, 0.3, 3
         
         # ------ HOW TO SET LIGHT DIRECTION - either basic version, or with d optimized
         # light dir == view dir - the basic option
@@ -273,8 +267,8 @@ class GaussianModel:
         attenuation_raw_coeffs = 1.0 / (denom_A + (denom_A == 0).float() * 1e-6)
         attenuation_coeffs = torch.clamp(attenuation_raw_coeffs, 0, 1)
         
-        # get preds from diffuseMLP
-        diffuse_component_mlp, _, _ = self.compute_mlp_outputs(
+        # ======== DIFFUSE 
+        diffuse_component_mlp = self.compute_mlp_outputs(
             base_color, light_gauss_dist, N, L, randomize_input=randomize_input)
 
         # Diffuse component - from MLP, light transfer eq
@@ -318,28 +312,27 @@ class GaussianModel:
         specular_component_coeffs =  (fresnel * D * G) / (spec_denom + (spec_denom == 0).float() * 1e-6)
         I_specular_coeffs = light_intensity * attenuation_coeffs * specular_component_coeffs*N_dot_L
 
-
+        # ======== TOTAL 
       
         if iter>self.start_mlp_iter: #warmup for Light params + diffuse MLP
-            # Total illumination
             I_diffuse_rough, I_specular_rough = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
         else:
             I_diffuse_rough, I_specular_rough  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
-
 
         
         I_diffuse_final, I_specular_final = torch.clamp_min(I_diffuse_rough, 0), torch.clamp_min(I_specular_rough, 0)
             
 
         if ret_loss:
-            atten_loss = 0 #not used
             if iter<=self.start_mlp_iter:
                 # at the begining we "initialize"  mlp with coeff values. 
                 linear_loss_factor = 1.0
+            elif self.end_diffuse_loss_iter <= self.start_mlp_iter:
+                linear_loss_factor = 0.0
             else: 
                 #we add more freedom to diffuse mlp to be able to model more complicated relations
                 linear_loss_factor = torch.clamp(\
-                    torch.tensor(1- ((iter- self.start_mlp_iter) / (self.end_diffuse_loss_iter - self.start_mlp_iter + 1e-10))), 0, 1)
+                    torch.tensor(1- ((iter- self.start_mlp_iter) / (self.end_diffuse_loss_iter - self.start_mlp_iter + self.eps_s0))), 0, 1)
             
             diffuse_loss = linear_loss_factor * \
                     (((1 - diffuse_component_mlp)**2)
@@ -356,7 +349,7 @@ class GaussianModel:
             reflected_rgb= I_diffuse_final+I_specular_final
 
         if ret_loss:
-            return reflected_rgb, (atten_loss, diffuse_loss, albedo_loss, roughness_loss, f0_loss)
+            return reflected_rgb, (diffuse_loss, albedo_loss, roughness_loss, f0_loss)
         else:
             return reflected_rgb
     

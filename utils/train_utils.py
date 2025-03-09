@@ -125,7 +125,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
     if iteration in testing_iterations:
         torch.cuda.empty_cache()
-        # train_cameras_filtered = [c for c in scene.getTrainCameras() if "aux" not in str(c.image_name)]
+
         validation_configs = (
             {'name': 'test', 'cameras' : scene.getTestCameras()}, 
             )
@@ -156,7 +156,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     if iteration == testing_iterations[0] or True:
                         tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/ground_truth", gt_image[None], global_step=iteration)
                     
-                    # render normals we use for training
+                    # render normals
                     dir_pp_camera = (scene.gaussians.get_xyz - viewpoint.camera_center.repeat(scene.gaussians.get_features.shape[0], 1))
                     normal = scene.gaussians.get_gaussian_normals()[:, 3:]
 
@@ -189,7 +189,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
                     torchvision.utils.save_image(image_random_mlp, os.path.join(gif_dir, f'{viewpoint.image_name}_relit_rotated_pose' + ".png"))
 
                     # ----------------------------
-                    # Function to interpolate matrices for smooth rotations. Only in last test iteration
+                    # Function to interpolate matrices for smooth rotations. Video only in last test iteration
                     # ----------------------------
 
                     if iteration==testing_iterations[-1]: 

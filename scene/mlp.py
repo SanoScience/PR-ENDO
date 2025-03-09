@@ -104,7 +104,7 @@ class MLP(nn.Module):
             raise NotImplemented('sh>3 not implemented')
         self.encoding_dims = encoding_dims
 
-        self.inputs_dim = self.distance_dims + self.viewdir_dims*2  +self.cos_dim #+self.encoding_dims
+        self.inputs_dim = self.distance_dims + self.viewdir_dims*2 +self.cos_dim + self.color_dims#+self.encoding_dims
                            
 
         # encoding layers
@@ -116,7 +116,7 @@ class MLP(nn.Module):
             layer = nn.Sequential(layer, nn.ReLU(True))
             setattr(self, f"encoding_{i+1}", layer)
 
-        self.opa_rgb = nn.Linear(self.W, 5) #diffuse + specular + attenuation at that gauss
+        self.opa_rgb = nn.Linear(self.W, 3)
 
 
     def forward(self, x):

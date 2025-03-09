@@ -1,16 +1,3 @@
-#
-# Copyright (C) 2023, Inria
-# GRAPHDECO research group, https://team.inria.fr/graphdeco
-# All rights reserved.
-#\
-# This software is free for non-commercial, research and evaluation use 
-# under the terms of the LICENSE.md file.
-#
-# For inquiries contact  george.drettakis@inria.fr
-#
-# This software has been modified for the Gaussian Pancakes paper by Sierra Bonilla.
-
-# Standard library imports
 import os
 import sys
 import uuid
@@ -152,7 +139,7 @@ def training(dataset, opt, pipe, args):
             pipe.debug = True
 
 
-        override_color, (atten_loss, diffuse_loss, albedo_loss, roughness_loss, f0_loss) = gaussians.compute_lighted_rgb(
+        override_color, (diffuse_loss, albedo_loss, roughness_loss, f0_loss) = gaussians.compute_lighted_rgb(
             camera_center = viewpoint_cam.camera_center, light = scene.light, ret_loss=True, iter=iteration, randomize_input=True)
         render_pkg = render(viewpoint_cam, gaussians, pipe, background, override_color = override_color)
         image, viewspace_point_tensor, visibility_filter, radii = \
@@ -190,7 +177,7 @@ def training(dataset, opt, pipe, args):
         if loss.isnan():
             print('nan')
             with open(log_file_path, "a") as file:
-                file.write("\n" + "NAN" + "\n")
+                file.write("\n" + "LOSS NAN" + "\n")
             print("\n[ITER {}] Saving Checkpoint".format(iteration))
             torch.save((gaussians.capture(), iteration), scene.model_path + "/chkpnt" + str(iteration) + ".pth")
 
@@ -207,7 +194,7 @@ def training(dataset, opt, pipe, args):
         # Add diffuse and tissue consistency losses
     
         #exception! diffuse loss can be only applied to visible gaussians. Otherwise we  get incorrectly assumed values
-        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].mean() #TODO change 10**6 here and args
+        loss += opt.diffuse_loss_weight * diffuse_loss[visibility_filter].mean()
         loss += opt.albedo_loss_weight * albedo_loss
         loss += opt.roughness_loss_weight * roughness_loss
         loss += opt.f0_loss_weight * f0_loss
@@ -326,20 +313,21 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=6009)
     parser.add_argument('--debug_from', type=int, default=-1)
     parser.add_argument('--detect_anomaly', action='store_true', default=False)
-    parser.add_argument("--test_iterations", nargs="+", type=int, default=[]) #[1_000, *range(5000, 1000000, 5000)])
-    parser.add_argument("--save_iterations", nargs="+", type=int, default=[]) #[1_000, *range(5000, 1000000, 5000)])
+    parser.add_argument("--test_iterations", nargs="+", type=int, default=[1000, 10000, 20000, 30000, 40000])
+    parser.add_argument("--save_iterations", nargs="+", type=int, default=[1000, 10000, 20000, 30000, 40000])
     parser.add_argument("--quiet", action="store_true")
-    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[]) #[1_000, *range(5000, 1000000, 5000)])
+    parser.add_argument("--checkpoint_iterations", nargs="+", type=int, default=[1000, 10000, 20000, 30000, 40000])
     parser.add_argument("--start_checkpoint", type=str, default = None)
     parser.add_argument("--verbose", action="store_true", default=False)
     parser.add_argument("--save_img_from_itr", nargs="+", type=int, default=None) 
     args = parser.parse_args(sys.argv[1:])
-    # important
+
     args.save_iterations.append(args.iterations)
     args.checkpoint_iterations.append(args.iterations)
     args.test_iterations.append(args.iterations)
-    assert args.save_iterations == args.checkpoint_iterations #maybe clean it later as one param
-    assert args.save_iterations == args.test_iterations #maybe clean it later as one param
+    assert args.save_iterations == args.checkpoint_iterations #TODO clean it
+    assert args.save_iterations == args.test_iterations #TODO clean it
+    
     print("Optimizing " + args.model_path)
 
     # initialize system state (RNG)
