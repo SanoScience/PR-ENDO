@@ -75,7 +75,7 @@ To train the model, follow these steps:
 2. **Update the Data Path**\
    Before executing the training script, ensure you set the correct data path in `run_all.sh`. Locate the following line:
    ```bash
-   base_path=""
+   base_path="path/to/data/C3VD"
    ```
    and update it with the appropriate dataset path to `C3VD` folder (`C3VD_endogslam_optimized` should be found automatically).
 
