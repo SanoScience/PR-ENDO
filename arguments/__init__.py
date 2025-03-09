@@ -101,7 +101,7 @@ class OptimizationParams(ParamGroup):
 
         # lrs & other params for our components
         self.start_mlp_iter = 1000
-        self.random_noise_val = 0.005
+        self.random_noise_val = 0.001
         self.mlp_lr = 0.0005
         self.grid_lr = 0.0005
         self.light_lr =0.003
