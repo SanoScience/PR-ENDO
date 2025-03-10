@@ -344,6 +344,7 @@ class GaussianModel:
             roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()
             f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()
                         
+        # to render light rotations (separate light from camera):
         if light_rot is not None:
 
             # Normalize the camera normal

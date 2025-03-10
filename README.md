@@ -87,7 +87,6 @@ To train the model, follow these steps:
    This script will handle the full training pipeline.
 
 
-Coming soon: script for light rotations.  
 TODO: HG as parameter. Currently to use HG please uncomment
  l. 211 in `scene/gaussian_model.py` and `l.107 in scene/mlp.py`
 
