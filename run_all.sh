@@ -28,7 +28,7 @@ for seq in "${sequences[@]}"; do
     echo "Processing sequence: $sequence_path with model path: $model_path"
 
 
-    python train_viewdir.py --model_path "$model_path" --eval --iteration 40000 -s "$sequence_path" --lambda_depth 0.2 --lambda_norm 0.1 --albedo_loss_weight 10.0 \
+    python train_viewdir.py --model_path "$model_path" --eval --iteration 40000 -s "$sequence_path" --lambda_depth 0.2 --lambda_norm 0.1 --albedo_loss_weight 1.0 \
     --densification_interval 1000 --opacity_reset_interval 3000 --densify_until_iter 10000 --densify_from_iter 1000 --mlp_lr 0.0005 --grid_lr 0.0005 \
     --end_diffuse_loss_iter 20000 --port 6000 --K_normals 100
     python render.py --model_path "$model_path" --eval -s "$sequence_path" --skip_train --iteration 40000
