@@ -125,7 +125,7 @@ if __name__ == "__main__":
                 override_color = gaussians.compute_lighted_rgb(camera_center = viewpoint_cam.camera_center, light = scene.light, iter = scene.loaded_iter)
                 render_pkg = render(viewpoint_cam, gaussians, pipe=pipe, bg_color=background, override_color = override_color)
                 rgb = render_pkg['render']
-                torchvision.utils.save_image(torch.clamp(rgb, 0.0, 1.0), os.path.join(modification_folder, f"camera{i}_original_render.png"))
+                # torchvision.utils.save_image(torch.clamp(rgb, 0.0, 1.0), os.path.join(modification_folder, f"camera{i}_original_render.png"))
                 
                 rgbmaps = []
                 for idx, modification_path in enumerate(modification_paths):
@@ -134,7 +134,7 @@ if __name__ == "__main__":
 
                     render_pkg = render(viewpoint_cam, gaussians, pipe=pipe, bg_color=background, override_color = override_color)
                     rgb = render_pkg['render']
-                    torchvision.utils.save_image(torch.clamp(rgb, 0.0, 1.0), os.path.join(modification_folder, f"camera{i}_timestep{idx}.png"))
+                    # torchvision.utils.save_image(torch.clamp(rgb, 0.0, 1.0), os.path.join(modification_folder, f"camera{i}_timestep{idx}.png"))
                     pil_rendering = torchvision.transforms.functional.to_pil_image(torch.clamp(rgb, 0.0, 1.0))
                     
                     # Draw text on the image
