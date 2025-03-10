@@ -9,13 +9,8 @@ import lpips
 from scene import Scene
 import numpy as np
 from PIL import Image
-import copy
 import imageio
-import torch.nn.functional as F
 import torchvision
-from utils.augmented_rotation_utils import rotate_matrix 
-
-
 from scene.cameras import Camera
 from scipy.spatial.transform import Rotation
 

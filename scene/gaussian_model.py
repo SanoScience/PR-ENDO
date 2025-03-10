@@ -214,7 +214,9 @@ class GaussianModel:
         return output
     
 
-    def compute_lighted_rgb(self, camera_center, light, ret_loss=False, iter = 0, randomize_input=False, disable_reflections = False, light_center_sep=None):
+    def compute_lighted_rgb(self, camera_center, light, ret_loss=False, iter = 0, 
+                            randomize_input=False, disable_reflections = False, 
+                            light_center_sep=None, light_rot = None, spotlight_attenuation_power = 0.0):
         
         if torch.is_tensor(light_center_sep):
             light_center_raw = light_center_sep
@@ -342,7 +344,29 @@ class GaussianModel:
             roughness_loss = ((self.roughness - self.roughness.mean(dim=0)) ** 2).mean()
             f0_loss = ((self.F_0 - self.F_0.mean(dim=0)) ** 2).mean()
                         
-            
+        if light_rot is not None:
+
+            # Normalize the camera normal
+            light_normal = torch.nn.functional.normalize(light_rot[:, 2], dim=0)
+
+            # Repeat camera normal for all features
+            light_normal = light_normal.repeat(self.get_features.shape[0], 1)
+
+            # Compute dot product (cosine of angle for spotlight angle)
+            cos_theta = torch.sum(L * -light_normal, dim=1).unsqueeze(1)
+
+            # Define scaling factors based on the cosine value
+            scaling_factor = torch.where(
+                cos_theta > 0, 
+                torch.abs(cos_theta**spotlight_attenuation_power),
+                0
+            )
+
+            # Apply scaling to I_diffuse_final and I_specular_final
+            I_diffuse_final = scaling_factor* I_diffuse_final
+            I_specular_final = scaling_factor * I_specular_final    
+        
+
         if disable_reflections:
             reflected_rgb= I_diffuse_final
         else:
