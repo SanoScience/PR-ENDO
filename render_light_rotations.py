@@ -68,7 +68,8 @@ if __name__ == "__main__":
             viewpoint_stack = viewpoint_stack[:1]
 
             for i, viewpoint_cam in tqdm(enumerate(viewpoint_stack), desc="render video progress"):
-
+                gif_imgs = []
+                
                 # Process each maximum rotation
                 for idx, max_rotation in enumerate(max_rotations):
                     
@@ -76,8 +77,8 @@ if __name__ == "__main__":
                     rotated_camera = rotate_camera(viewpoint_cam, 
                                                    torch.clamp(viewpoint_cam.original_image.to("cuda"), 0.0, 1.0),
                                                    angle=max_rotation)
-                    interpolated_cameras = interpolate_cameras(viewpoint_cam, rotated_camera, steps=20)
-                    gif_imgs = []
+                    interpolated_cameras_tmp = interpolate_cameras(viewpoint_cam, rotated_camera, steps=20)
+                    interpolated_cameras = interpolated_cameras_tmp + interpolated_cameras_tmp[::-1]
     
                     # Render interpolated frames
                     for ic in interpolated_cameras:
@@ -106,9 +107,9 @@ if __name__ == "__main__":
                         pil_rendering = torchvision.transforms.functional.to_pil_image(image_rendered)
                         gif_imgs.append(pil_rendering)
 
-                    # Save the entire sequence as a video
-                    video_path = os.path.join(video_dir, f"{viewpoint_cam.image_name}_rotid{idx}.mp4")
-                    writer = imageio.get_writer(video_path, fps=24)
-                    for img in gif_imgs:
-                        writer.append_data(np.array(img))
-                    writer.close()
+                # Save the entire sequence as a video
+                video_path = os.path.join(video_dir, f"{viewpoint_cam.image_name}.mp4")
+                writer = imageio.get_writer(video_path, fps=24)
+                for img in gif_imgs:
+                    writer.append_data(np.array(img))
+                writer.close()

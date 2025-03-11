@@ -139,7 +139,7 @@ if __name__ == "__main__":
                     
                     # Draw text on the image
                     draw = ImageDraw.Draw(pil_rendering)
-                    draw.text(( pil_rendering.width - 10 * len("sinus_games"), 20), "sinus_games", fill="green" )  # Adjust position
+                    draw.text(( pil_rendering.width - 10 * len("sinus_games"), 20), "sinus_games", fill="green" )
     
                     rgbmaps.append(pil_rendering)
 
