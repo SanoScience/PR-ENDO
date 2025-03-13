@@ -84,6 +84,7 @@ class OptimizationParams(ParamGroup):
         self.scaling_lr = 0.005
         self.rotation_lr = 0.001
         self.max_scale = 0.1
+        self.use_hg = False
         
         # pbr gaussian lrs
         self.roughness_lr = 0.002
