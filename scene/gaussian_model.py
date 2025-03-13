@@ -447,6 +447,7 @@ class GaussianModel:
         print("Finished creating Gaussian model from point cloud.")
 
     def training_setup(self, training_args, tuning=False):
+        self.use_hg = training_args.use_hg
         self.setup_mlp(training_args.use_hg)
         self.percent_dense = training_args.percent_dense
         self.xyz_gradient_accum = torch.zeros((self.get_xyz.shape[0], 1), device="cuda")
