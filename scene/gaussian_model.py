@@ -59,13 +59,13 @@ class GaussianModel:
 
         self.surface_normal = return_surface_normal
     
-    def setup_mlp(self, use_hg):
+    def setup_mlp(self):
         self.mlp_W = 128
         self.mlp_D = 4
         self.positional_encoding_camera = HashGrid(input_dim=4).cuda()
 
         encoding_dims = self.positional_encoding_camera.encoding.n_output_dims
-        self.mlp = MLP(self.max_sh_degree, self.mlp_W, self.mlp_D, use_hg, encoding_dims=encoding_dims).cuda()
+        self.mlp = MLP(self.max_sh_degree, self.mlp_W, self.mlp_D, self.use_hg, encoding_dims=encoding_dims).cuda()
 
 
     def __init__(self, sh_degree : int):
@@ -447,8 +447,7 @@ class GaussianModel:
         print("Finished creating Gaussian model from point cloud.")
 
     def training_setup(self, training_args, tuning=False):
-        self.use_hg = training_args.use_hg
-        self.setup_mlp(training_args.use_hg)
+        self.setup_mlp()
         self.percent_dense = training_args.percent_dense
         self.xyz_gradient_accum = torch.zeros((self.get_xyz.shape[0], 1), device="cuda")
         self.denom = torch.zeros((self.get_xyz.shape[0], 1), device="cuda")

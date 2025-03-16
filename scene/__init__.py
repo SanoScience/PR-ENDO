@@ -31,6 +31,7 @@ class Scene:
         self.model_path = args.model_path
         self.loaded_iter = None
         self.gaussians = gaussians
+        self.gaussians.use_hg = args.use_hg
 
 
         # Light params
@@ -98,7 +99,7 @@ class Scene:
                                                            "point_cloud.ply"))
             self.gaussians.spatial_lr_scale = self.cameras_extent
             try:
-                self.gaussians.setup_mlp(self.gaussians.use_hg)
+                self.gaussians.setup_mlp()
                 self.gaussians.mlp.load_state_dict(torch.load(self.model_path + "/chkpnt_mlp" + str(self.loaded_iter) + ".pth"))
                 self.gaussians.positional_encoding_camera.load_state_dict(torch.load(self.model_path + "/chkpnt_grid_camera" + str(self.loaded_iter) + ".pth"))
 

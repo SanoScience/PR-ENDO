@@ -57,6 +57,7 @@ class ModelParams(ParamGroup):
         self._white_background = False
         self.data_device = "cuda"
         self.eval = False
+        self.use_hg = False
         super().__init__(parser, "Loading Parameters", sentinel)
 
     def extract(self, args):
@@ -84,7 +85,6 @@ class OptimizationParams(ParamGroup):
         self.scaling_lr = 0.005
         self.rotation_lr = 0.001
         self.max_scale = 0.1
-        self.use_hg = False
         
         # pbr gaussian lrs
         self.roughness_lr = 0.002

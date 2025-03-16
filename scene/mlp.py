@@ -92,17 +92,6 @@ class MLP(nn.Module):
         self.use_hg = use_hg
 
         self.sh_degree=sh_degree
-        self.features_dc_dim = 3*1
-        if self.sh_degree==0:
-            self.features_rest_dim=0*3
-        elif self.sh_degree==1:
-            self.features_rest_dim=3*3
-        elif self.sh_degree==2:
-            self.features_rest_dim=8*3
-        elif self.sh_degree==3:
-            self.features_rest_dim=15*3
-        else:
-            raise NotImplemented('sh>3 not implemented')
         
         self.encoding_dims = encoding_dims
 
