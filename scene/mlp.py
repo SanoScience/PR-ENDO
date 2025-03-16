@@ -77,7 +77,7 @@ class HashGrid(nn.Module):
         return self.encoding(x)
         
 class MLP(nn.Module):
-    def __init__(self, sh_degree, mlp_W, mlp_D, encoding_dims):
+    def __init__(self, sh_degree, mlp_W, mlp_D, use_hg, encoding_dims):
         """
         """
         super().__init__()
@@ -89,34 +89,27 @@ class MLP(nn.Module):
         self.distance_dims = 1
         self.light_I_dim = 1
         self.cos_dim = 1
+        self.use_hg = use_hg
 
         self.sh_degree=sh_degree
-        self.features_dc_dim = 3*1
-        if self.sh_degree==0:
-            self.features_rest_dim=0*3
-        elif self.sh_degree==1:
-            self.features_rest_dim=3*3
-        elif self.sh_degree==2:
-            self.features_rest_dim=8*3
-        elif self.sh_degree==3:
-            self.features_rest_dim=15*3
-        else:
-            raise NotImplemented('sh>3 not implemented')
+        
         self.encoding_dims = encoding_dims
 
-        self.inputs_dim = self.distance_dims + self.viewdir_dims*2 +self.cos_dim + self.color_dims#+self.encoding_dims
+        self.inputs_dim = self.distance_dims + self.viewdir_dims*2 +self.cos_dim + self.color_dims
+        if self.use_hg:
+            self.inputs_dim += self.encoding_dims
                            
 
-        # encoding layers
+        # layers
         for i in range(self.D):
             if i == 0:
                 layer = nn.Linear(self.inputs_dim, self.W)
             else:
                 layer = nn.Linear(self.W, self.W)
             layer = nn.Sequential(layer, nn.ReLU(True))
-            setattr(self, f"encoding_{i+1}", layer)
+            setattr(self, f"layer_{i+1}", layer)
 
-        self.opa_rgb = nn.Linear(self.W, 3)
+        self.out = nn.Linear(self.W, 3)
 
 
     def forward(self, x):
@@ -125,9 +118,9 @@ class MLP(nn.Module):
  
         input = x
         for i in range(self.D):
-            input = getattr(self, f"encoding_{i+1}")(input)
+            input = getattr(self, f"layer_{i+1}")(input)
 
-        outputs = self.opa_rgb(input)
+        outputs = self.out(input)
         return outputs
         
 

@@ -87,8 +87,7 @@ To train the model, follow these steps:
    This script will handle the full training pipeline.
 
 
-TODO: HG as parameter. Currently to use HG please uncomment
- l. 211 in `scene/gaussian_model.py` and `l.107 in scene/mlp.py`
+To use HashGrid, add the `--use_hg` flag to train.py and render.py.
 
 ## Citation
 If you find this work useful, please cite:
