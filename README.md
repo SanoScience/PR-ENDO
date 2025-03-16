@@ -71,7 +71,7 @@ pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/to
 To train the model, follow these steps:
 
 1. **Prepare the Data**\
-   Before running the training, you must process the data using EndoGSLAM. The dataset should be structured correctly, with scenes organized under the `C3VD/...` and `C3VD_endogslam_optimized/...` directory. Data used for trainig available [here](https://sanoscience-my.sharepoint.com/:f:/g/personal/j_kaleta_sanoscience_org/EvkA8HMXxiBEpeKpsDcb2L4B-C1DfEUdCzDzSPeOVnirnA?e=QYLQjU).
+   Before running the training, you must process the data using EndoGSLAM. The dataset should be structured correctly, with scenes organized under the `C3VD/...` and `C3VD_endogslam_optimized/...` directory. Data used for trainig available [here](https://sanoscience-my.sharepoint.com/:f:/g/personal/j_kaleta_sanoscience_org/EvkA8HMXxiBEpeKpsDcb2L4BYtB8oiggestAyIvw4R7NYw?e=6iyfkd).
 2. **Update the Data Path**\
    Before executing the training script, ensure you set the correct data path in `run_all.sh`. Locate the following line:
    ```bash
