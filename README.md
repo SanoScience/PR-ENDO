@@ -89,6 +89,9 @@ To train the model, follow these steps:
 
 To use HashGrid, add the `--use_hg` flag to train.py and render.py.
 
+## Acknowledgements
+We thank authors of [GaussianPancakes](https://github.com/smbonilla/GaussianPancakes ) for their code base.
+
 ## Citation
 If you find this work useful, please cite:
 
