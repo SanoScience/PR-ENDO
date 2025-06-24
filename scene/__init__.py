@@ -71,7 +71,7 @@ class Scene:
         if "C3VD" in args.source_path:
             scene_info=sceneLoadTypeCallbacks["colon"](args.source_path)
         elif "Rotate" in args.source_path:
-            scene_info=sceneLoadTypeCallbacks["colonRotate"](args.source_path)
+            scene_info=sceneLoadTypeCallbacks["rotate"](args.source_path)
         else:
             print(f"your source path is: {args.source_path}")
             raise NotImplementedError

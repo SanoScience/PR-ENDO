@@ -70,14 +70,15 @@ pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/to
 
 To train the model, follow these steps:
 
-1. **Prepare the Data**\
-   Before running the training, you must process the data using EndoGSLAM. The dataset should be structured correctly, with scenes organized under the `C3VD/...` and `C3VD_endogslam_optimized/...` directory. Data used for trainig available [here](https://sanoscience-my.sharepoint.com/:f:/g/personal/j_kaleta_sanoscience_org/EvkA8HMXxiBEpeKpsDcb2L4BYtB8oiggestAyIvw4R7NYw?e=6iyfkd).
+1. **Preprocessed Data**\
+   C3VD processed with EndoGSLAM and RotateColon are available [here](http://zenodo.org/records/15732143). The C3VD data should be structured correctly, with scenes organized under the `C3VD/...` and `C3VD_endogslam_optimized/...` directories.  
 2. **Update the Data Path**\
-   Before executing the training script, ensure you set the correct data path in `run_all.sh`. Locate the following line:
+   Before executing the training script, ensure you set the correct data path in `run_all.sh`. Locate the following lines:
    ```bash
-   base_path="path/to/data/C3VD"
+   base_path="path/to/data/C3VD"  
+   base_path="path/to/data/RotateColon"
    ```
-   and update it with the appropriate dataset path to `C3VD` folder (`C3VD_endogslam_optimized` should be found automatically).
+   and update it with the appropriate dataset paths to `C3VD` and `RotateColon` folders. `C3VD_endogslam_optimized` should be found automatically.
 
 3. **Run Training**\
    Once the data is prepared, start the training process by executing the script:

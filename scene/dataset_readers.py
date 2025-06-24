@@ -470,12 +470,183 @@ def readColonSceneInfo(path):
     return scene_info
 
 ########################################################################
+#### RotateColon datareader - TODO clean duplicated code
+from tqdm import tqdm
+import OpenEXR
+import copy
     
 
+def readRotateSceneInfo(path):
+
+    extension = ".png"
+
+    train_cameras = []
+    with open(os.path.join(path, "transforms.json")) as json_file:
+        contents = json.load(json_file)
+        fovx = contents["camera_angle_x"]
+
+        frames = contents["frames"]
+        for idx, frame in tqdm(enumerate(frames), desc="Loading train cameras"):
+            
+            frame_zfill = frame['file_path'].zfill(4)
+            cam_name = os.path.join(path, "train_views", f"{frame_zfill}{extension}")
+            depth_name = os.path.join(path, "depth_train", f"{frame_zfill}.exr")
+
+            # NeRF 'transform_matrix' is a camera-to-world transform
+            c2w = np.array(frame["transform_matrix"])
+            # change from OpenGL/Blender camera axes (Y up, Z back) to COLMAP (Y down, Z forward)
+            c2w[:3, 1:3] *= -1
+
+            # get the world-to-camera transform and set R, T
+            w2c = np.linalg.inv(c2w)
+            R = np.transpose(w2c[:3,:3])  # R is stored transposed due to 'glm' in CUDA code
+            T = w2c[:3, 3]
+
+            # Read IMG - lots of redundant code
+            image_path = os.path.join(path, cam_name)
+            image_name = Path(cam_name).stem
+            image = Image.open(image_path).convert("RGBA")
+            w, h = image.size[0], image.size[1]
+
+            cx = w / 2
+            cy = h / 2
+
+        
+            # Get FoVs
+            fovy = focal2fov(fov2focal(fovx, image.size[0]), image.size[1])
+            FovY = fovy 
+            FovX = fovx
+
+            # Read depth
+            with OpenEXR.File(depth_name) as infile:
+                depth = infile.channels()["ViewLayer.Depth.Z"].pixels
+                
+            depth = depth / 1.4 #depth scale for ColonRotate
+            depth =(depth * 255).astype(np.float32)
+            depth = Image.fromarray(depth) 
+
+            #create camera object - completely multiplied code, redundant in so many places...
+            camera_train = CameraInfo(uid=idx, 
+                                R=R, T=T, 
+                                FovX=FovX, 
+                                FovY=FovY, 
+                                image=image, 
+                                depth=depth,
+                                image_path=image_path,
+                                image_name=image_name,
+                                depth_name=depth_name,
+                                depth_path=depth_name,
+                                width=w, height=h,
+                                cx=cx, cy=cy)
+            
+            
+            train_cameras.append(camera_train)
+
+        
+
+    test_cameras = []
+    with open(os.path.join(path, "transforms_test.json")) as json_file:
+        contents = json.load(json_file)
+        fovx = contents["camera_angle_x"]
+
+        frames = contents["frames"]
+        # Load testing cameras
+        for idx, frame in tqdm(enumerate(frames), desc="Loading test cameras"):
+            frame_zfill = frame['file_path'].zfill(4)
+            cam_name = os.path.join(path, "test_views_1", f"{frame_zfill}{extension}")
+            
+            # NeRF 'transform_matrix' is a camera-to-world transform
+            c2w = np.array(frame["transform_matrix"])
+            # change from OpenGL/Blender camera axes (Y up, Z back) to COLMAP (Y down, Z forward)
+            c2w[:3, 1:3] *= -1
+
+            # get the world-to-camera transform and set R, T
+            w2c = np.linalg.inv(c2w)
+            R = np.transpose(w2c[:3,:3])  # R is stored transposed due to 'glm' in CUDA code
+            T = w2c[:3, 3]
+
+
+            # Read IMG - lots of redundant code
+            image_path = os.path.join(path, cam_name)
+            image_name = Path(cam_name).stem
+            image = Image.open(image_path).convert("RGBA")
+            w, h = image.size[0]//1, image.size[1]//1
+            cx = w / 2
+            cy = h / 2
+
+            
+            # Get FoVs
+            fovy = focal2fov(fov2focal(fovx, image.size[0]), image.size[1])
+            FovY = fovy 
+            FovX = fovx
+
+            #create camera object - completely multiplied code, redundant in so many places...
+            placeholder_depth = copy.copy(depth)
+            camera_test = CameraInfo(uid=idx, 
+                                R=R, T=T, 
+                                FovX=FovX, 
+                                FovY=FovY, 
+                                image=image, 
+                                depth=placeholder_depth,
+                                image_path=image_path,
+                                image_name=image_name,
+                                depth_name=None,
+                                depth_path=None,
+                                width=w, height=h,
+                                cx=cx, cy=cy)
+            
+            
+            
+            test_cameras.append(camera_test)
+
+    #normalize scene
+    nerf_normalization = getNerfppNorm(train_cameras)
+    
+    # prepare init point cloud
+    original_ply_path = os.path.join(path, "init_point_cloud.ply")
+    auxiliary_ply_path = os.path.join(path, "init_point_cloud_auxiliary.ply")
+    init_pt_cld = PlyData.read(original_ply_path)
+
+    x = init_pt_cld['vertex'].data['x']
+    y = init_pt_cld['vertex'].data['y']
+    z = init_pt_cld['vertex'].data['z']
+    x_array = np.array(x)
+    y_array = np.array(y)
+    z_array = np.array(z)
+    xyz = np.stack([x_array, y_array, z_array], axis=1)
+    rgb_colors = xyz.copy()
+
+
+    r_fixed = 188/255.
+    g_fixed = 99/255.
+    b_fixed = 76/255.
+
+    rgb_colors[:,0] = rgb_colors[:,0]*0 +r_fixed
+    rgb_colors[:,1] = rgb_colors[:,1]*0 +g_fixed
+    rgb_colors[:,2] = rgb_colors[:,2]*0 +b_fixed
+    rgb_colors = np.clip(rgb_colors, 0.0, 1.0)
+
+    
+    pcd = BasicPointCloud(points=xyz, colors=rgb_colors, normals=np.zeros((len(xyz), 3)))
+    storePly(auxiliary_ply_path, xyz, rgb_colors * 255)
+    try:
+        pcd = fetchPly(auxiliary_ply_path)
+    except:
+        pcd = None
+    
+    scene_info = SceneInfo(point_cloud=pcd,
+                        train_cameras=train_cameras,
+                        test_cameras=test_cameras,
+                        nerf_normalization=nerf_normalization,
+                        ply_path=auxiliary_ply_path)
+            
+    return scene_info
+###########################################################
 
 sceneLoadTypeCallbacks = {
     "Colmap": readColmapSceneInfo,
     "Blender" : readNerfSyntheticInfo, 
     "RNN" : readRNNSceneInfo,
     "colon": readColonSceneInfo, #Dataset from endoGslam
+    "rotate": readRotateSceneInfo, #Dataset RotateColon
 }

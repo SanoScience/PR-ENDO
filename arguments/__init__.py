@@ -101,7 +101,7 @@ class OptimizationParams(ParamGroup):
         self.K_normals = 100
 
         # lrs & other params for our components
-        self.start_mlp_iter = 1000
+        # self.start_mlp_iter = 1000 # not parametrized, hardcoded in gaussian model
         self.random_noise_val = 0.001
         self.mlp_lr = 0.0005
         self.grid_lr = 0.0005
