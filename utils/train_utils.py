@@ -144,7 +144,7 @@ def training_report(tb_writer, iteration, Ll1, loss, l1_loss, elapsed, testing_i
 
 
                 if tb_writer and idx < 5:
-                    tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/render_base", image[None], global_step=iteration)
+                    tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/render_albedo_linear", image[None], global_step=iteration)
                     tb_writer.add_images(f"{config['name']}_view_{viewpoint.image_name}/render_lit", image_mlp[None], global_step=iteration)
                     torchvision.utils.save_image(image_mlp, os.path.join(gif_dir, f'{viewpoint.image_name}_lit_original_pose'+ ".png"))
                     

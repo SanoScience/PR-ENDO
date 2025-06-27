@@ -76,7 +76,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
             override_color = gaussians.compute_gaussian_rgb(view.camera_center)
             renderpkg = render(view, gaussians, pipeline, background, override_color = override_color)
-            rendering = renderpkg["render"].clamp(0,1)
+            rendering = renderpkg["render"].clamp(min=1e-8, max=1)**(1/2.2) # linear to srgb
             torchvision.utils.save_image(rendering, os.path.join(albedo_path, '{0:05d}'.format(idx) + ".png"))
 
             # render normals

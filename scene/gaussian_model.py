@@ -376,10 +376,11 @@ class GaussianModel:
         else:
             reflected_rgb= I_diffuse_final+I_specular_final
 
+        # linear to srgb using gamma correction 1/2.2
         if ret_loss:
-            return reflected_rgb, (diffuse_loss, albedo_loss, roughness_loss, f0_loss)
+            return reflected_rgb.clamp(min=1e-6)**(1/2.2), (diffuse_loss, albedo_loss, roughness_loss, f0_loss)
         else:
-            return reflected_rgb
+            return reflected_rgb.clamp(min=1e-6)**(1/2.2)
     
 
     @property
