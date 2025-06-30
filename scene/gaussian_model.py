@@ -175,6 +175,8 @@ class GaussianModel:
         return torch.clamp(self.F_0, 0, 0.035)
     
     def compute_gaussian_rgb(self, camera_center):
+        #Returns base color, we already treat it as scaled by pi: a/pi, see eq.8 paper
+
         shs_view = self.get_features.transpose(1, 2).view(-1, 3, (self.max_sh_degree+1)**2)
         dir_pp = (self.get_xyz - camera_center.repeat(self.get_features.shape[0], 1))
         dir_pp_normalized = dir_pp/dir_pp.norm(dim=1, keepdim=True)
