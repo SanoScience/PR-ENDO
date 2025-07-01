@@ -84,6 +84,11 @@
             <span class="author-block">*equal contribution</span>
           </div>
 
+          <!-- New MICCAI acceptance message -->
+          <div class="is-size-5 has-text-centered" style="margin-top: 10px;">
+            <b>Accepted to MICCAI 2025!</b>
+          </div>
+
           <div class="is-size-5 publication-authors">
           </div>
 
@@ -172,12 +177,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Endoscopic procedures are crucial for colorectal cancer diagnosis, and three-dimensional reconstruction of the environment for real-time novel-view synthesis can significantly enhance diagnosis.
-             We present <b>PR-ENDO</b>, a framework that leverages 3D Gaussian Splatting within a physically based, relightable model tailored for the complex acquisition conditions in endoscopy, such as restricted camera rotations and strong view-dependent illumination. 
-             By exploiting the connection between the camera and light source, our approach introduces a relighting model to capture the intricate interactions between light and tissue using physically based rendering and MLP. 
-             Existing methods often produce artifacts and inconsistencies under these conditions, which <b>PR-ENDO</b> overcomes by incorporating a specialized diffuse MLP that utilizes light angles and normal vectors, achieving stable reconstructions even with limited training camera rotations. 
-             We benchmarked our framework using a publicly available dataset and a newly introduced dataset with wider camera rotations. 
-            Our methods demonstrated superior image quality compared to baseline approaches.
+            Endoluminal endoscopic procedures are essential for diagnosing colorectal cancer and other severe conditions in the digestive tract, urogenital system, and airways. 3D reconstruction and novel-view synthesis from endoscopic images are promising tools for enhancing diagnosis. Moreover, integrating physiological deformations and interaction with the endoscope enables the development of simulation tools from real video data. However, constrained camera trajectories and view-dependent lighting create artifacts, leading to inaccurate or overfitted reconstructions. We present <b>PR-ENDO</b>, a novel 3D reconstruction framework leveraging the unique property of endoscopic imaging, where a single light source is closely aligned with the camera. Our method separates light effects from tissue properties. <b>PR-ENDO</b> enhances 3D Gaussian Splatting with a physically based relightable model. We boost the traditional light transport formulation with a specialized MLP capturing complex light-related effects while ensuring reduced artifacts and better generalization across novel views. <b>PR-ENDO</b> achieves superior reconstruction quality compared to baseline methods on both public and in-house datasets. Unlike existing approaches, <b>PR-ENDO</b> enables tissue modifications while preserving a physically accurate response to light, making it closer to real-world clinical use.
           </p>
         </div>
       </div>
