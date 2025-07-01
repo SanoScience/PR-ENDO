@@ -193,40 +193,40 @@
 
     <div class="container">
       <h2 class="title is-3">Simulate body movement</h2>
-        <video id="sim1" src="assets/videos/move_to_sides.mp4" autoplay loop muted></video>
-        <video id="sim2" src="assets/videos/stretch_squeeze.mp4" autoplay loop muted></video>
+        <video id="sim1" src="assets/videos/move_to_sides.mp4" autoplay loop muted style="max-width: 70%; height: auto;"></video>
+        <video id="sim2" src="assets/videos/stretch_squeeze.mp4" autoplay loop muted style="max-width: 70%; height: auto;"></video>
     </div>
     </div>
   </section>
     
   <section class="section">
   <div class="container">
-    <div class="columns is-vcentered">
-      <!-- Left Column: Switch + Videos -->
-      <div class="column is-half has-text-centered">
-        <h2 class="title is-4">Change colon properties</h2>
-        <div class="switch">
-          <input id="switch-y" name="tripple" type="radio" value="Y" class="switch-input" data-stage="1" />
-          <label for="switch-y" class="switch-label switch-label-y">Less rough</label>
-          <input id="switch-i" name="tripple" type="radio" value="I" class="switch-input" checked data-stage="2" />
-          <label for="switch-i" class="switch-label switch-label-i">Normal</label>
-          <input id="switch-n" name="tripple" type="radio" value="N" class="switch-input" data-stage="3" />
-          <label for="switch-n" class="switch-label switch-label-n">More rough</label>
-          <span class="switch-selector"></span>
-        </div>
-        <div class="video-container">
-          <video id="video1" src="assets/videos/rotatelight_lessroughness247.mp4" autoplay loop muted></video>
-          <video id="video2" src="assets/videos/normalroughness_247.mp4" autoplay loop class="active" muted></video>
-          <video id="video3" src="assets/videos/moreroughness_247.mp4" autoplay loop muted></video>
-        </div>
-      </div>
 
-      <!-- Right Column: Static Video -->
-      <div class="column is-half has-text-centered">
-        <h2 class="title is-4">Change light properties</h2>
-        <video src="assets/videos/change_light.mp4" autoplay loop muted controls style="max-width: 100%; height: auto;"></video>
+    <!-- Top Section: Switch + Videos -->
+    <div class="column">
+      <h2 class="title is-4">Change colon properties</h2>
+      <div class="switch">
+        <input id="switch-y" name="tripple" type="radio" value="Y" class="switch-input" data-stage="1" />
+        <label for="switch-y" class="switch-label switch-label-y">Less rough</label>
+        <input id="switch-i" name="tripple" type="radio" value="I" class="switch-input" checked data-stage="2" />
+        <label for="switch-i" class="switch-label switch-label-i">Normal</label>
+        <input id="switch-n" name="tripple" type="radio" value="N" class="switch-input" data-stage="3" />
+        <label for="switch-n" class="switch-label switch-label-n">More rough</label>
+        <span class="switch-selector"></span>
+      </div>
+      <div class="video-container">
+        <video id="video1" src="assets/videos/rotatelight_lessroughness247.mp4" autoplay loop muted style="max-width: 50%; height: auto;"></video>
+        <video id="video2" src="assets/videos/normalroughness_247.mp4" autoplay loop class="active" muted style="max-width: 50%; height: auto;"></video>
+        <video id="video3" src="assets/videos/moreroughness_247.mp4" autoplay loop muted style="max-width: 50%; height: auto;"></video>
       </div>
     </div>
+
+    <!-- Bottom Section: Static Video -->
+    <div class="column">
+      <h2 class="title is-4">Change light properties</h2>
+      <video src="assets/videos/change_light.mp4" autoplay loop muted controls style="max-width: 50%; height: auto;"></video>
+    </div>
+
   </div>
 </section>
 
