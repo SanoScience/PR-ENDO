@@ -175,7 +175,7 @@ class GaussianModel:
         return torch.clamp(self.F_0, 0, 0.035)
     
     def compute_gaussian_rgb(self, camera_center):
-        #Returns base color, we already treat it as scaled by pi: a/pi, see eq.8 paper
+        #Returns base color
 
         shs_view = self.get_features.transpose(1, 2).view(-1, 3, (self.max_sh_degree+1)**2)
         dir_pp = (self.get_xyz - camera_center.repeat(self.get_features.shape[0], 1))
@@ -234,12 +234,12 @@ class GaussianModel:
         light_intensity, attenuation_k, attenuation_power, light_adjustment = light[0], light[1], light[2], light[3:12]
         
         # ------ HOW TO SET LIGHT DIRECTION - either basic version, or with d optimized
-        # light dir == view dir - the basic option
+        # First option: light dir == view dir - the basic option
         light_center = light_center_raw
         dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
         dir_pp_light = torch.nn.functional.normalize(dir_pp_light, dim=1)
 
-        # # light source is offset by d 
+        # # Second option: light source is offset by d 
         # offset = light_adjustment[:3] #only couple of entries for light adjustment are finally needed
         # light_center = light_center_raw+offset
         # dir_pp_light = (self.get_xyz - light_center.repeat(self.get_features.shape[0], 1))
@@ -253,7 +253,7 @@ class GaussianModel:
 
         dir_pp_camera = (self.get_xyz - camera_center.repeat(self.get_features.shape[0], 1))
         camera_gauss_dist = dir_pp_camera.norm(dim=1, keepdim=True) / self.spatial_lr_scale 
-        # self.spatial_lr_scale  - its scene radius
+        # variable self.spatial_lr_scale  - its scene radius
 
         normal = self.get_gaussian_normals()[:, 3:]
 
@@ -279,10 +279,10 @@ class GaussianModel:
             base_color, light_gauss_dist, N, L, randomize_input=randomize_input)
 
         # Diffuse component - from MLP, light transfer eq
-        I_diffuse_color_mlp = light_intensity  *(base_color * diffuse_component_mlp) * attenuation_coeffs * N_dot_L
+        I_diffuse_color_mlp = light_intensity  *(base_color * diffuse_component_mlp /3.14) * attenuation_coeffs * N_dot_L
 
         #Diffuse component - from coefficients, light transfer eq
-        I_diffuse_color_coeffs = light_intensity  * N_dot_L * attenuation_coeffs * base_color
+        I_diffuse_color_coeffs = light_intensity  * N_dot_L * attenuation_coeffs * (base_color/ 3.14)
         
 
         # ======== PBR reflections
@@ -290,7 +290,7 @@ class GaussianModel:
         # Compute halfway vector for specular component
         H = F.normalize(L + V, dim=1)
         
-        # Fresnel Effect (Schlick's approximation) for non-metals (F0 = 0.04) -value from gpt
+        # Fresnel Effect (Schlick's approximation) for non-metals (F0 = 0.03 for testines) 
         fresnel = self.get_F_0 + (1 - self.get_F_0) * (1 - torch.sum(H * V, dim=1, keepdim=True)) ** 5
         
         # Specular component using Cook-Torrance model
@@ -322,12 +322,12 @@ class GaussianModel:
         # ======== TOTAL 
       
         if iter>self.start_mlp_iter: #warmup for Light params + diffuse MLP
-            I_diffuse_rough, I_specular_rough = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
+            I_diffuse_raw, I_specular_raw = I_diffuse_color_mlp*(1-fresnel),  I_specular_coeffs
         else:
-            I_diffuse_rough, I_specular_rough  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
+            I_diffuse_raw, I_specular_raw  = I_diffuse_color_coeffs*(1-fresnel), I_specular_coeffs
 
         
-        I_diffuse_final, I_specular_final = torch.clamp_min(I_diffuse_rough, 0), torch.clamp_min(I_specular_rough, 0)
+        I_diffuse_final, I_specular_final = torch.clamp_min(I_diffuse_raw, 0), torch.clamp_min(I_specular_raw, 0)
             
 
         if ret_loss:
