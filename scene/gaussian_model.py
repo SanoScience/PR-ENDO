@@ -341,6 +341,8 @@ class GaussianModel:
                 linear_loss_factor = torch.clamp(\
                     torch.tensor(1- ((iter- self.start_mlp_iter) / (self.end_diffuse_loss_iter - self.start_mlp_iter + self.eps_s0))), 0, 1)
             
+            # we found penalizing only diffuse component is slightly more stable. 
+            # alternatively you can try: (base_color/3.14 - diffuse_component_mlp*base_color/3.14)
             diffuse_loss = linear_loss_factor * \
                     (((1 - diffuse_component_mlp)**2)
                     )
