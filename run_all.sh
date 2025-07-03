@@ -48,4 +48,4 @@ model_path="output_RotateColon"  # Use sequence name as part of the model path
 
 python train_viewdir.py --model_path "$model_path" --eval --iteration 30000 -s "$sequence_path" --lambda_depth 0.2 --lambda_norm 0.1 --albedo_loss_weight 1.0 \
 --densification_interval 1000 --opacity_reset_interval 3000 --densify_until_iter 10000 --densify_from_iter 1000 --mlp_lr 0.0005 --grid_lr 0.0005 \
---end_diffuse_loss_iter 20000 --port 6000 --K_normals 30 --diffuse_loss_weight 0.1
+--end_diffuse_loss_iter 20000 --port 6000 --K_normals 30 --diffuse_loss_weight 0.01
