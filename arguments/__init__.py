@@ -84,7 +84,7 @@ class OptimizationParams(ParamGroup):
         self.opacity_lr = 0.05
         self.scaling_lr = 0.005
         self.rotation_lr = 0.001
-        self.max_scale = 0.1
+        # self.max_scale = 0.1 # not parametrized, hardcoded in gaussian model
         
         # pbr gaussian lrs
         self.roughness_lr = 0.002
